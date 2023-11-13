@@ -26,6 +26,7 @@ app.layout = html.Div(
         html.Div(id="table-output", style={'textAlign': 'center','padding-top': '10px'}),
         dcc.Interval(id="interval-component", interval=1 * 60 * 1000, n_intervals=0),
         html.H6(id='refresh_cycle', style={'textAlign':'right','padding-top':'20px','padding-right':'10px'}),
+        html.Div(id='cycle-selection',style={'display': 'none'}),
         
         
     ]
@@ -37,20 +38,14 @@ def extract_date(filename):
     cycle_part = parts[2]
     return date_part, cycle_part
 
-    
-    
-
-
-@app.callback(Output("table-output", "children"),
-              Output("title","children"),
-              Output("refresh_cycle","children"),
-              [Input("interval-component", "n_intervals"),
-               Input('btn-00', 'n_clicks'),
-               Input('btn-06', 'n_clicks'),
-               Input('btn-12', 'n_clicks'),
-               Input('btn-18', 'n_clicks'),])
-def update_table(n, btn_00, btn_06, btn_12, btn_18):
-
+@app.callback(
+        Output('cycle-selection','children'),
+        [Input('btn-00', 'n_clicks'),
+        Input('btn-06', 'n_clicks'),
+        Input('btn-12', 'n_clicks'),
+        Input('btn-18', 'n_clicks'),]
+)
+def cycle_button(btn_00, btn_06, btn_12, btn_18):
     ctx = dash.callback_context
 
     if not ctx.triggered_id:
@@ -68,8 +63,15 @@ def update_table(n, btn_00, btn_06, btn_12, btn_18):
         cycle_hour = '18'
     else:
         cycle_hour = '00'
-    
-    
+    return cycle_hour
+
+
+@app.callback(Output("table-output", "children"),
+              Output("title","children"),
+              Output("refresh_cycle","children"),
+              [Input("interval-component", "n_intervals"),
+               Input("cycle-selection","children")])
+def update_table(n,cycle_hour):
 
     last_report_fn = os.listdir("./reports")[0]
     cycle_date = extract_date(last_report_fn)
