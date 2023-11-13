@@ -1,6 +1,6 @@
 import dash
-from dash import dcc, html
-from dash.dependencies import Input, Output
+from dash import dcc, html,ctx
+from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 #from dash_bootstrap_templates import load_figure_template
 from dash import dash_table
@@ -16,12 +16,17 @@ app._favicon = ("ok.ico")
 
 
 app.layout = html.Div(
-    style = {'textAlign':'center','font-family':"Arial, sans-serif",},
+    style = {'textAlign':'center','font-family':"Tahoma, sans-serif",},
     children=[
-        html.H4(id='title', style={'padding-top': '20px'}),
-        html.Div(id="table", style={'textAlign': 'center','padding-top': '20px'}),
+        html.Button('Cycle 00', id='btn-00', n_clicks=0),
+        html.Button('Cycle 06', id='btn-06', n_clicks=0),
+        html.Button('Cycle 12', id='btn-12', n_clicks=0),
+        html.Button('Cycle 18', id='btn-18', n_clicks=0),
+        html.H4(id='title', style={'textAlign':'left','padding-top': '20px','padding-left':'20px'}),
+        html.Div(id="table-output", style={'textAlign': 'center','padding-top': '10px'}),
         dcc.Interval(id="interval-component", interval=1 * 60 * 1000, n_intervals=0),
         html.H6(id='refresh_cycle', style={'textAlign':'right','padding-top':'20px','padding-right':'10px'}),
+        
         
     ]
 )
@@ -32,14 +37,45 @@ def extract_date(filename):
     cycle_part = parts[2]
     return date_part, cycle_part
 
-@app.callback(Output("table", "children"),
+    
+    
+
+
+@app.callback(Output("table-output", "children"),
               Output("title","children"),
               Output("refresh_cycle","children"),
-              [Input("interval-component", "n_intervals")])
-def update_table(n):
+              [Input("interval-component", "n_intervals"),
+               Input('btn-00', 'n_clicks'),
+               Input('btn-06', 'n_clicks'),
+               Input('btn-12', 'n_clicks'),
+               Input('btn-18', 'n_clicks'),])
+def update_table(n, btn_00, btn_06, btn_12, btn_18):
+
+    ctx = dash.callback_context
+
+    if not ctx.triggered_id:
+        button_id = 'btn-00'
+    else:
+        button_id = ctx.triggered_id.split('.')[0]
+
+    if button_id == 'btn-00':
+        cycle_hour = '00'
+    elif button_id == 'btn-06':
+        cycle_hour = '06'
+    elif button_id == 'btn-12':
+        cycle_hour = '12'
+    elif button_id == 'btn-18':
+        cycle_hour = '18'
+    else:
+        cycle_hour = '00'
+    
+    
+
     last_report_fn = os.listdir("./reports")[0]
     cycle_date = extract_date(last_report_fn)
-    report_df = pd.read_csv(f"./reports/{last_report_fn}")
+    filename = f"./reports/report_{cycle_date[0]}_{cycle_hour}"
+    print(filename)
+    report_df = pd.read_csv(filename)
     report_df = report_df.fillna("")
     style_conditions = [
     {
@@ -51,17 +87,18 @@ def update_table(n):
     {
         'if': {'column_id': report_df.columns[0]},
         'backgroundColor': 'rgb(30, 30, 30)',
-        'color': 'white'
+        'color': 'white',
+        'fontWeight' : 'bold'
     }]
     style_data_conditional = style_data_conditional_first_col + style_conditions
 
-    title = f"Report For {cycle_date[0]}, Cycle {cycle_date[1]}"
+    title = f"{cycle_date[0]}, Cycle {cycle_hour}"
     refresh = f"Refreshed {n} times"
     table = dash_table.DataTable(id="table",
                                 data = report_df.to_dict("records"),
                                 columns = [{"name": i, "id": i} for i in report_df.columns],
                                 style_table={'height': '600px'},
-                                style_cell={'textAlign':'center','font-family':'Arial,sans-serif'},
+                                style_cell={'textAlign':'center','font-family':'Tahoma,sans-serif'},
                                 style_header={
                                     'backgroundColor': 'rgb(30, 30, 30)',
                                     'fontWeight': 'bold',
@@ -74,7 +111,7 @@ def update_table(n):
                                 
                                     
                              )
-    return table, title, refresh
+    return html.Div([table]), title, refresh
 
 
 if __name__ == "__main__":
