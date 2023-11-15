@@ -9,6 +9,7 @@ from dateutil.relativedelta import relativedelta
 import os
 import argparse
 from tqdm import tqdm
+import numpy as np
 
 parser = argparse.ArgumentParser(
                     prog='Get Weather Data',
@@ -47,7 +48,10 @@ else:
     cycle = f'{int(args.c):02d}'
     base = f'gefs.{file_dt}/{cycle}/atmos/pgrb2ap5/geavg.t{cycle}z.pgrb2a.0p50.f'
 try:
-    last_report_fn = f'./reports/report_{ dt.strftime("%Y-%m-%d")}_{((int(cycle)-6)%24):02d}'
+    if int(cycle) ==0:
+        last_report_fn = f'./reports/report_{ (dt+relativedelta(days=-1)).strftime("%Y-%m-%d")}_{((int(cycle)-6)%24):02d}'
+    else:
+        last_report_fn = f'./reports/report_{ dt.strftime("%Y-%m-%d")}_{((int(cycle)-6)%24):02d}'
     last_report = pd.read_csv(last_report_fn)
     last_report = last_report.iloc[:-1].to_dict()
 except:
@@ -111,7 +115,7 @@ for file in pbar:
             national_dd = round((region_df['population']*region_df['dd']).sum()/region_df['population'].sum(),2)
             report_dict['Current FC'].append(national_dd)
             
-            report_df = pd.DataFrame(dict([ (k,pd.Series(v,dtype=pd.Float32Dtype)) for k,v in report_dict.items() ]))
+            report_df = pd.DataFrame(dict([ (k,pd.Series(v,dtype=np.float16)) if k != 'Date' else (k,pd.Series(v)) for k,v in report_dict.items() ]))
             report_df['Diff 12 hours ago'] = report_df['Current FC']-report_df['FC 12 hours ago']
             report_df['Diff 24 hours ago'] = report_df['Current FC']-report_df['FC 24 hours ago']
             report_df.loc['Total']= report_df[report_df.columns[1:]].sum(min_count=1)
@@ -120,14 +124,18 @@ for file in pbar:
             
             cycles = []
 
-        cycles.append(f"dd_{idx%24:02d}")
         client.download_file('noaa-gefs-pds', file, 'temp')
+        cycles.append(f"dd_{idx%24:02d}")
         process('temp', f"{idx%24:02d}")
         time.sleep(2)
     except Exception as e:
-        print(e)
-        # time.sleep(60)
-        break
+        print(e, flush=True)
+        time.sleep(60)
+
+try:
+    os.remove('temp')
+except:
+    pass
     
 
     

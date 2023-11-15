@@ -6,6 +6,8 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import pandas as pd
 import os
+from datetime import date
+import re
 
 #load_figure_template('darkly')
 
@@ -73,10 +75,14 @@ def cycle_button(btn_00, btn_06, btn_12, btn_18):
                Input("cycle-selection","children")])
 def update_table(n,cycle_hour):
 
-    last_report_fn = os.listdir("./reports")[0]
-    cycle_date = extract_date(last_report_fn)
-    filename = f"./reports/report_{cycle_date[0]}_{cycle_hour}"
-    print(filename)
+    
+    report_ls = os.listdir("./reports")
+    r = re.compile(f"_{cycle_hour}$")
+    fn = list(filter(r.search, report_ls))[0]
+    
+    cycle_date = extract_date(fn)
+    filename = f"./reports/{fn}"
+    
     report_df = pd.read_csv(filename)
     report_df = report_df.fillna("")
     style_conditions = [
