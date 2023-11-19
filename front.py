@@ -75,7 +75,6 @@ def cycle_button(btn_00, btn_06, btn_12, btn_18):
                Input("cycle-selection","children")])
 def update_table(n,cycle_hour):
 
-    
     report_ls = os.listdir("./reports")
     r = re.compile(f"_{cycle_hour}$")
     fn = list(filter(r.search, report_ls))[0]
@@ -85,19 +84,38 @@ def update_table(n,cycle_hour):
     
     report_df = pd.read_csv(filename)
     report_df = report_df.fillna("")
+
+    def calculate_color(value):
+        try:
+            numeric_value = float(value)
+            if -3 < numeric_value < 0:
+                red_value = int(255 - abs(numeric_value) * 85) 
+                return f'rgb(255, {red_value}, {red_value})'
+            elif 0 < numeric_value < 3:
+                blue_value = int(numeric_value * 85)
+                return f'rgb({blue_value}, {blue_value}, 255)'
+            else:
+                return 'rgb(73,77,74)'
+        except ValueError:
+            return 'rgb(73,77,74)'
+
     style_conditions = [
     {
-        'if': {'column_id': col},
-        'backgroundColor': 'rgb(118,148,126)' if any(report_df[col] != '') else 'rgb(73,77,74)',
-        'color': 'white'
-    } for col in report_df.columns[1:]]
+        'if': {'column_id': col, 'row_index': i},
+        'backgroundColor': calculate_color(value),
+        'color': 'black' if col in report_df.columns[-2:] else 'white'
+    } for col in report_df.columns[1:] for i, value in enumerate(report_df[col])
+]
+
     style_data_conditional_first_col = [
-    {
-        'if': {'column_id': report_df.columns[0]},
-        'backgroundColor': 'rgb(30, 30, 30)',
-        'color': 'white',
-        'fontWeight' : 'bold'
-    }]
+        {
+            'if': {'column_id': report_df.columns[0], 'row_index': i},
+            'backgroundColor': 'rgb(30, 30, 30)',
+            'color': 'white',
+            'fontWeight': 'bold'
+        } for i in range(len(report_df))
+    ]
+
     style_data_conditional = style_data_conditional_first_col + style_conditions
 
     title = f"{cycle_date[0]}, Cycle {cycle_hour}"
