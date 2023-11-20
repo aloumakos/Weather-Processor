@@ -1,0 +1,7 @@
+boto3
+pygrib
+pandas
+tqdm
+dash
+dash_bootstrap_components
+gunicorn

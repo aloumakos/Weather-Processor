@@ -101,13 +101,12 @@ except:
     pass
 
 cycles = []
-pbar = tqdm(files)
-for file in pbar:
-    idx = int(file.split(".")[-1][-3:])
-    # print(file, idx, cycle)
-    try:
-        
-        if idx%24==(24-int(cycle))%24 and idx>24-int(cycle):
+error_flag = False
+pbar = tqdm(total=len(files))
+while files:
+    idx = int(files[0].split(".")[-1][-3:])
+    try:    
+        if idx%24==(24-int(cycle))%24 and idx>24-int(cycle) and not error_flag:
             ct_df['dd'] = ct_df[cycles].sum(axis=1)/len(cycles)
             
             state_df = ct_df.groupby(['state_name','region'])[['population', 'dd']].apply(_to_state).reset_index()
@@ -123,15 +122,18 @@ for file in pbar:
             report_df.to_csv(f'reports/report_{ dt.strftime("%Y-%m-%d")}_{cycle}', index=False)
             
             cycles = []
-
-        client.download_file('noaa-gefs-pds', file, 'temp')
+        client.download_file('noaa-gefs-pds', files[0], 'temp')
         cycles.append(f"dd_{idx%24:02d}")
         process('temp', f"{idx%24:02d}")
         time.sleep(2)
+        pbar.update()
+        del files[0]
+        error_flag = False
     except Exception as e:
-        print(e, flush=True)
+        # print(e, flush=True)
+        error_flag = True
         time.sleep(60)
-
+pbar.close()
 try:
     os.remove('temp')
 except:

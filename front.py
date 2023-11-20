@@ -16,6 +16,7 @@ app.config.external_stylesheets = [dbc.themes.DARKLY]
 app.title = 'My Weather App'
 app._favicon = ("ok.ico")
 
+server = app.server
 
 app.layout = html.Div(
     style = {'textAlign':'center','font-family':"Tahoma, sans-serif",},
@@ -26,7 +27,7 @@ app.layout = html.Div(
         html.Button('Cycle 18', id='btn-18', n_clicks=0),
         html.H4(id='title', style={'textAlign':'left','padding-top': '20px','padding-left':'20px'}),
         html.Div(id="table-output", style={'textAlign': 'center','padding-top': '10px'}),
-        dcc.Interval(id="interval-component", interval=1 * 60 * 1000, n_intervals=0),
+        dcc.Interval(id="interval-component", interval=1 * 30 * 1000, n_intervals=0),
         html.H6(id='refresh_cycle', style={'textAlign':'right','padding-top':'20px','padding-right':'10px'}),
         html.Div(id='cycle-selection',style={'display': 'none'}),
         
@@ -75,7 +76,6 @@ def cycle_button(btn_00, btn_06, btn_12, btn_18):
                Input("cycle-selection","children")])
 def update_table(n,cycle_hour):
 
-    
     report_ls = os.listdir("./reports")
     r = re.compile(f"_{cycle_hour}$")
     fn = list(filter(r.search, report_ls))[0]
@@ -123,4 +123,4 @@ def update_table(n,cycle_hour):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(port=8050)
