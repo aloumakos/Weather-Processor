@@ -141,7 +141,7 @@ while files:
         del files[0]
         error_flag = False
     except Exception as e:
-        print(e, flush=True)
+        # print(e, flush=True)
         error_flag = True
         time.sleep(60)
 pbar.close()
