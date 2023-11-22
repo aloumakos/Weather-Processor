@@ -96,7 +96,7 @@ def update_table(n,cycle_hour):
                 red_value = int(255 - abs(numeric_value) * 85) 
                 return f'rgb(255, {red_value}, {red_value})'
             elif 0 < numeric_value < 3:
-                blue_value = int(numeric_value * 85)
+                blue_value = int(255 - abs(numeric_value) * 85) 
                 return f'rgb({blue_value}, {blue_value}, 255)'
             else:
                 return 'rgb(73,77,74)'
