@@ -10,6 +10,7 @@ import os
 import argparse
 from tqdm import tqdm
 import numpy as np
+import re
 
 parser = argparse.ArgumentParser(
                     prog='Get Weather Data',
@@ -29,11 +30,12 @@ else:
     month = int(args.d.split('/')[0])
     day = int(args.d.split('/')[1])
     dt = datetime(datetime.now().year, month, day)
-    
-file_dt = "".join(list(map(str,[dt.year,dt.month,f"{dt.day:02d}"])))
+
+
 client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
 
 if args.c is None:
+    file_dt = "".join(list(map(str,[dt.year,f"{dt.month:02d}",f"{dt.day:02d}"])))
     bucket = client.list_objects(Bucket='noaa-gefs-pds', Prefix = "gefs."+file_dt+"/", Delimiter="/",)
 
     while True:
@@ -45,14 +47,20 @@ if args.c is None:
     cycle = fldr.split('/')[-2]
     base = f'{fldr[:-1]}/atmos/pgrb2ap5/geavg.t{cycle}z.pgrb2a.0p50.f'
 else:
+    if args.c == "18":
+        dt = dt + relativedelta(days=-1)
+        file_dt = "".join(list(map(str,[dt.year,f"{dt.month:02d}",f"{dt.day:02d}"])))
+    else:
+        file_dt = "".join(list(map(str,[dt.year,f"{dt.month:02d}",f"{dt.day:02d}"])))
     cycle = f'{int(args.c):02d}'
     base = f'gefs.{file_dt}/{cycle}/atmos/pgrb2ap5/geavg.t{cycle}z.pgrb2a.0p50.f'
+    
 try:
-    if int(cycle) ==0:
-        last_report_fn = f'./reports/report_{ (dt+relativedelta(days=-1)).strftime("%Y-%m-%d")}_{((int(cycle)-6)%24):02d}'
-    else:
-        last_report_fn = f'./reports/report_{ dt.strftime("%Y-%m-%d")}_{((int(cycle)-6)%24):02d}'
-    last_report = pd.read_csv(last_report_fn)
+    report_ls = os.listdir("./reports")
+    r = re.compile(f"_{((int(cycle)-6)%24):02d}$")
+    fn = list(filter(r.search, report_ls))[0]
+
+    last_report = pd.read_csv(f"./reports/{fn}")
     last_report = last_report.iloc[:-1].to_dict()
 except:
     last_report = report_dict = {
@@ -81,7 +89,7 @@ for i in range(246,390-int(cycle),6):
 
 def process(file, cycle):
     grbs = pygrib.open(file)
-    grb = grbs.select(name='Temperature')[-1]
+    grb = grbs.select(name='Temperature')[-2]
     data = grb.data()[0]
     
     def f(lat, lon):
@@ -96,7 +104,10 @@ def _to_region(x):
     return pd.Series({'dd':(x['population'] * x['dd']/x['population'].sum()).sum(),'population': x['population'].sum()})
 
 try:
-    os.remove(f'./reports/report_{ (dt+relativedelta(days=-1)).strftime("%Y-%m-%d")}_{cycle}')
+    report_ls = os.listdir("./reports")
+    r = re.compile(f"_{int(cycle):02d}$")
+    fn = list(filter(r.search, report_ls))[0]
+    os.remove(f"./reports/{fn}")
 except:
     pass
 
@@ -130,11 +141,11 @@ while files:
         del files[0]
         error_flag = False
     except Exception as e:
-        # print(e, flush=True)
+        print(e, flush=True)
         error_flag = True
         time.sleep(60)
 pbar.close()
-try:
+try:  
     os.remove('temp')
 except:
     pass

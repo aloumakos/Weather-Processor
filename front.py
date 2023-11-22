@@ -54,16 +54,8 @@ def cycle_button(btn_00, btn_06, btn_12, btn_18):
     else:
         button_id = ctx.triggered_id.split('.')[0]
 
-    if button_id == 'btn-00':
-        cycle_hour = '00'
-    elif button_id == 'btn-06':
-        cycle_hour = '06'
-    elif button_id == 'btn-12':
-        cycle_hour = '12'
-    elif button_id == 'btn-18':
-        cycle_hour = '18'
-    else:
-        cycle_hour = '00'
+    cycle_hour = button_id.split('-')[1] if button_id else '00'
+    
     return cycle_hour
 
 
