@@ -29,9 +29,7 @@ app.layout = html.Div(
         html.Div(id="table-output", style={'textAlign': 'center','padding-top': '10px'}),
         dcc.Interval(id="interval-component", interval=1 * 30 * 1000, n_intervals=0),
         html.H6(id='refresh_cycle', style={'textAlign':'right','padding-top':'20px','padding-right':'10px'}),
-        html.Div(id='cycle-selection',style={'display': 'none'}),
-        
-        
+        html.Div(id='cycle-selection',style={'display': 'none'}),     
     ]
 )
 
@@ -56,16 +54,8 @@ def cycle_button(btn_00, btn_06, btn_12, btn_18):
     else:
         button_id = ctx.triggered_id.split('.')[0]
 
-    if button_id == 'btn-00':
-        cycle_hour = '00'
-    elif button_id == 'btn-06':
-        cycle_hour = '06'
-    elif button_id == 'btn-12':
-        cycle_hour = '12'
-    elif button_id == 'btn-18':
-        cycle_hour = '18'
-    else:
-        cycle_hour = '00'
+    cycle_hour = button_id.split('-')[1] if button_id else '00'
+    
     return cycle_hour
 
 
@@ -76,9 +66,14 @@ def cycle_button(btn_00, btn_06, btn_12, btn_18):
                Input("cycle-selection","children")])
 def update_table(n,cycle_hour):
 
+    refresh = f"Refreshed {n} times"
+
     report_ls = os.listdir("./reports")
     r = re.compile(f"_{cycle_hour}$")
-    fn = list(filter(r.search, report_ls))[0]
+    try:
+        fn = list(filter(r.search, report_ls))[0]
+    except:
+        return None, "Could not find data for this cycle atm", refresh
     
     cycle_date = extract_date(fn)
     filename = f"./reports/{fn}"
@@ -120,7 +115,7 @@ def update_table(n,cycle_hour):
     style_data_conditional = style_data_conditional_first_col + style_conditions
 
     title = f"{cycle_date[0]}, Cycle {cycle_hour}"
-    refresh = f"Refreshed {n} times"
+    
     table = dash_table.DataTable(id="table",
                                 data = report_df.to_dict("records"),
                                 columns = [{"name": i, "id": i} for i in report_df.columns],

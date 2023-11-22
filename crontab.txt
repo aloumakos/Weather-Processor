@@ -1,4 +1,0 @@
-30 1 * * * /home/weather/script
-0 8 * * * /home/weather/script
-0 13 * * * /home/weather/script
-0 18 * * * /home/weather/script
