@@ -14,7 +14,7 @@ import re
 app = dash.Dash(__name__)
 app.config.external_stylesheets = [dbc.themes.DARKLY]
 app.title = 'My Weather App'
-app._favicon = ("ok.ico")
+app._favicon = ("peeporain.gif")
 
 server = app.server
 
