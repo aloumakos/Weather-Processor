@@ -47,7 +47,7 @@ if args.c is None:
     cycle = fldr.split('/')[-2]
     base = f'{fldr[:-1]}/atmos/pgrb2ap5/geavg.t{cycle}z.pgrb2a.0p50.f'
 else:
-    if args.c == "18":
+    if args.c == "18" and args.d is None:
         dt = dt + relativedelta(days=-1)
         file_dt = "".join(list(map(str,[dt.year,f"{dt.month:02d}",f"{dt.day:02d}"])))
     else:
@@ -70,16 +70,22 @@ except:
         "FC 18 hours ago": [],
         "FC 24 hours ago": [],
     }
+def _combine_reports(current_cycle, past_cycle, last_forecast):
+    if current_cycle <= past_cycle:
+        return list(last_forecast.values())[1:] + [np.NaN]
+    return last_forecast
+
 report_dict = {
-        "Date": [(date.today()+relativedelta(days=i)).strftime("%a, %d %b %Y") for i in range(1,16)],
+        "Date": [(dt+relativedelta(days=i)).strftime("%a, %d %b %Y") for i in range(1,16)],
         "Current FC": [],
-        "FC 6 hours ago": last_report['Current FC'],
-        "FC 12 hours ago": last_report['FC 6 hours ago'],
-        "FC 18 hours ago": last_report['FC 12 hours ago'],
-        "FC 24 hours ago": last_report['FC 18 hours ago'],
+        "FC 6 hours ago": _combine_reports(int(cycle),(int(cycle)-6)%24, last_report['Current FC']),
+        "FC 12 hours ago": _combine_reports(int(cycle),(int(cycle)-12)%24, last_report['FC 6 hours ago']),
+        "FC 18 hours ago": _combine_reports(int(cycle),(int(cycle)-18)%24, last_report['FC 12 hours ago']),
+        "FC 24 hours ago": _combine_reports(int(cycle),(int(cycle)-24)%24, last_report['FC 18 hours ago']),
         "Diff 12 hours ago": [],
         "Diff 24 hours ago": []
     }
+    
 
 files = []
 for i in range(24-int(cycle),243,3):
@@ -128,7 +134,7 @@ while files:
             report_df = pd.DataFrame(dict([ (k,pd.Series(v,dtype=np.float16)) if k != 'Date' else (k,pd.Series(v)) for k,v in report_dict.items() ]))
             report_df['Diff 12 hours ago'] = report_df['Current FC']-report_df['FC 12 hours ago']
             report_df['Diff 24 hours ago'] = report_df['Current FC']-report_df['FC 24 hours ago']
-            report_df.loc['Total']= report_df[report_df.columns[1:]].sum(min_count=1)
+            report_df.loc['Total']= report_df[report_df.columns[1:]][:-1].sum(min_count=1)
             report_df = report_df.round(2)
             report_df.to_csv(f'reports/report_{ dt.strftime("%Y-%m-%d")}_{cycle}', index=False)
             
