@@ -79,13 +79,13 @@ report_dict = {
         "Date": [(dt+relativedelta(days=i)).strftime("%a, %d %b %Y") for i in range(1,16)],
         "Current FC": [],
         "FC 6 hours ago": _combine_reports(int(cycle),(int(cycle)-6)%24, last_report['Current FC']),
-        "FC 12 hours ago": _combine_reports(int(cycle),(int(cycle)-12)%24, last_report['FC 6 hours ago']),
-        "FC 18 hours ago": _combine_reports(int(cycle),(int(cycle)-18)%24, last_report['FC 12 hours ago']),
-        "FC 24 hours ago": _combine_reports(int(cycle),(int(cycle)-24)%24, last_report['FC 18 hours ago']),
+        "FC 12 hours ago": _combine_reports(int(cycle),(int(cycle)-6)%24, last_report['FC 6 hours ago']),
+        "FC 18 hours ago": _combine_reports(int(cycle),(int(cycle)-6)%24, last_report['FC 12 hours ago']),
+        "FC 24 hours ago": _combine_reports(int(cycle),(int(cycle)-6)%24, last_report['FC 18 hours ago']),
         "Diff 12 hours ago": [],
         "Diff 24 hours ago": []
     }
-    
+
 
 files = []
 for i in range(24-int(cycle),243,3):
