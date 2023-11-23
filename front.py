@@ -2,11 +2,9 @@ import dash
 from dash import dcc, html,ctx
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-#from dash_bootstrap_templates import load_figure_template
 from dash import dash_table
 import pandas as pd
 import os
-from datetime import date
 import re
 
 #load_figure_template('darkly')
@@ -84,10 +82,10 @@ def update_table(n,cycle_hour):
     def calculate_color(value):
         try:
             numeric_value = float(value)
-            if -3 < numeric_value < 0:
+            if -15 < numeric_value < 0:
                 red_value = int(255 - abs(numeric_value) * 85) 
                 return f'rgb(255, {red_value}, {red_value})'
-            elif 0 < numeric_value < 3:
+            elif 0 < numeric_value < 15:
                 blue_value = int(255 - abs(numeric_value) * 85) 
                 return f'rgb({blue_value}, {blue_value}, 255)'
             else:
