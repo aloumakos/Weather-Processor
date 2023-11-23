@@ -1,4 +1,4 @@
-0 3 * * * /home/weather/cron_scripts/pull_data 18
-0 8 * * * /home/weather/cron_scripts/pull_data 0
-0 13 * * * /home/weather/cron_scripts/pull_data 6
-0 18 * * * /home/weather/cron_scripts/pull_data 12
+0 3 * * * /home/weather/cron_scripts/pull_data.sh 18
+0 8 * * * /home/weather/cron_scripts/pull_data.sh 0
+0 13 * * * /home/weather/cron_scripts/pull_data.sh 6
+0 18 * * * /home/weather/cron_scripts/pull_data.sh 12
