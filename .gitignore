@@ -1,3 +1,6 @@
 temp
 front_gradient.py
 *.ipynb
+creds
+keys.json
+__pycache__

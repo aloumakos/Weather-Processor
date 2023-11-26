@@ -5,3 +5,5 @@ tqdm
 dash
 dash_bootstrap_components
 gunicorn
+oauth2client
+google-api-python-client
