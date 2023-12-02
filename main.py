@@ -1,7 +1,7 @@
 import boto3
 from botocore import UNSIGNED
 from botocore.client import Config
-from datetime import datetime, date
+from datetime import datetime
 import time
 import pygrib
 import pandas as pd
@@ -11,6 +11,7 @@ import argparse
 from tqdm import tqdm
 import numpy as np
 import re
+from bootstrap import upload_report, delete_report
 
 parser = argparse.ArgumentParser(
                     prog='Get Weather Data',
@@ -151,8 +152,11 @@ while files:
         error_flag = True
         time.sleep(60)
 pbar.close()
+
 try:  
     os.remove('temp')
+    delete_report(f'report_{ (dt+relativedelta(days=-1)).strftime("%Y-%m-%d")}_{cycle}')
+    upload_report(f'reports/report_{ dt.strftime("%Y-%m-%d")}_{cycle}')
 except:
     pass
     
