@@ -48,6 +48,15 @@ tab_selected_style = {
     
 }
 
+def extract_date(filename):
+    parts = filename.split('_')
+    date_part = parts[1]
+    cycle_part = parts[2]
+    return date_part, cycle_part
+
+report_ls = os.listdir("./reports")
+
+
 app.layout = html.Div(
     style={'textAlign': 'center', 'font-family': "Lucida Console, monospace", },
     children=[
@@ -58,14 +67,12 @@ app.layout = html.Div(
             n_intervals=0,
         ),
         html.H1(children="hello werld", style={'textAlign': 'center', 'padding-top': '30px','padding-bottom':'40px'}),
-        dbc.Progress(id='progress-bar',value=0, max=30,style={'margin-bottom':'10px'}),
-        dcc.Tabs(id='tabs', value='tab-00', children=[
-            dcc.Tab(label='cycle 00', value='tab-00',style=tab_style, selected_style=tab_selected_style),
-            dcc.Tab(label='cycle 06', value='tab-06',style=tab_style, selected_style=tab_selected_style),
-            dcc.Tab(label='cycle 12', value='tab-12',style=tab_style, selected_style=tab_selected_style),
-            dcc.Tab(label='cycle 18', value='tab-18',style=tab_style, selected_style=tab_selected_style),
-        ],
-        style={'backgroundColor': 'transparent'}),
+        dcc.Tabs(id='tabs', value='tab-00', style={'display':'inline-block'},children=[
+            dcc.Tab(id='tab1',label='', value='tab-00',style=tab_style, selected_style=tab_selected_style),
+            dcc.Tab(id='tab2',label='', value='tab-06',style=tab_style, selected_style=tab_selected_style),
+            dcc.Tab(id='tab3',label='', value='tab-12',style=tab_style, selected_style=tab_selected_style),
+            dcc.Tab(id='tab4',label='', value='tab-18',style=tab_style, selected_style=tab_selected_style),
+        ]),
         html.H5(id='title', style={'display':'None'}),
         html.H5(id='current-time', style={'display':'None'}),
         html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','margin': 'auto','display':'inline-block'}),
@@ -74,6 +81,7 @@ app.layout = html.Div(
         #html.H6(id='refresh_cycle', style={'textAlign': 'right', 'padding-top': '20px', 'padding-right': '10px'}),
         html.Div(id='cycle-selection', style={'display': 'none'}),
         html.Br(),
+        html.Div(dbc.Progress(id='progress-bar',value=0, max=30,style={'margin-bottom':'10px','width': '180px'}),style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
         html.Div([
         html.Img(src="assets/hello_kitty.gif", style={'width': '10%', 'height': 'auto'}),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'})
@@ -116,12 +124,6 @@ def update_countdown(n):
 
     return dbc.Alert(cd_output, color="primary"), current_time
 
-def extract_date(filename):
-    parts = filename.split('_')
-    date_part = parts[1]
-    cycle_part = parts[2]
-    return date_part, cycle_part
-
 @app.callback(
     Output('cycle-selection', 'children'),
     [Input('tabs', 'value')]
@@ -133,6 +135,10 @@ def cycle_tab(tab_value):
 @app.callback(Output("table-output", "children"),
               Output("title", "children"),
               Output("refresh_cycle", "children"),
+              Output('tab1','label'),
+              Output('tab2','label'),
+              Output('tab3','label'),
+              Output('tab4','label'),
               [Input("interval-component", "n_intervals"),
                Input("cycle-selection", "children")])
 def update_table(n, cycle_hour):
@@ -193,6 +199,25 @@ def update_table(n, cycle_hour):
     title = title.strftime("%d-%m-%Y")
     title = f"today's date: {title}"
 
+    tabs_labels = []
+    for file in report_ls[:-1]:
+        tab_l = extract_date(file)
+        date = datetime.strptime(tab_l[0],'%Y-%m-%d')
+        date = date.strftime('%d-%m-%Y')
+        filenames = f"{date} - {tab_l[1]}"
+        tabs_labels.append(filenames)
+    
+    for i in tabs_labels:
+        if i.endswith(str(00)):
+            tab1_label = i
+        if i.endswith(str('{:02d}'.format(6))):
+            tab2_label = i
+        if i.endswith(str(12)):
+            tab3_label = i
+        if i.endswith(str(18)):
+            tab4_label = i
+    
+
     table = dash_table.DataTable(id="table",
                                  data=report_df.to_dict("records"),
                                  columns=[{"name": i, "id": i} for i in report_df.columns],
@@ -208,12 +233,11 @@ def update_table(n, cycle_hour):
                                  },
                                  style_data_conditional=style_data_conditional
                                  )
-    return html.Div([table]), title, refresh
-
-
-
-
-
+    
+    
+    
+    
+    return html.Div([table]), title, refresh, tab1_label, tab2_label, tab3_label, tab4_label
 
 
 if __name__ == "__main__":
