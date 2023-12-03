@@ -9,10 +9,13 @@ import os
 import re
 
 # load_figure_template('darkly')
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
-app = dash.Dash(__name__)
+app = dash.Dash(title="Based", update_title=None )
 app.config.external_stylesheets = [dbc.themes.DARKLY]
-app.title = 'Based'
+
 app._favicon = ("peeporain.gif")
 
 server = app.server
@@ -51,7 +54,7 @@ app.layout = html.Div(
         html.Div(id="countdown-output"),
         dcc.Interval(
             id="interval-component-countdown",
-            interval=1000,  # in milliseconds
+            interval=100,  # in milliseconds
             n_intervals=0,
         ),
         html.H1(children="hello werld", style={'textAlign': 'center', 'padding-top': '30px','padding-bottom':'40px'}),
@@ -82,7 +85,7 @@ app.layout = html.Div(
     [Input('interval-component-countdown', 'n_intervals')]
 )
 def update_progress_bar(n):
-    progress = n%30
+    progress = (n*0.1)%30
     return progress
 
 report_times = [datetime.now().replace(hour=3, minute=0, second=0),
@@ -148,7 +151,7 @@ def update_table(n, cycle_hour):
 
     report_df = pd.read_csv(filename)
     report_df = report_df.fillna("")
-    report_df = report_df.applymap(lambda x: x.lower() if isinstance(x, str) else x)
+    report_df = report_df.map(lambda x: x.lower() if isinstance(x, str) else x)
     report_df.columns = map(str.lower, report_df.columns)
 
     def calculate_color(value):
