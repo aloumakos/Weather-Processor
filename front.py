@@ -54,8 +54,6 @@ def extract_date(filename):
     cycle_part = parts[2]
     return date_part, cycle_part
 
-report_ls = os.listdir("./reports")
-
 
 app.layout = html.Div(
     style={'textAlign': 'center', 'font-family': "Lucida Console, monospace", },
@@ -143,14 +141,33 @@ def cycle_tab(tab_value):
                Input("cycle-selection", "children")])
 def update_table(n, cycle_hour):
 
+    
+
     refresh = f"Refreshed {n} times"
 
     report_ls = os.listdir("./reports")
+    tab1_label = tab2_label = tab3_label = tab4_label = "tba"
+    filtered_list = [item for item in report_ls if item.startswith('report_2023')]
+    for file in filtered_list:
+        tab_l = extract_date(file)
+        date = datetime.strptime(tab_l[0],'%Y-%m-%d')
+        date = date.strftime('%d-%m-%Y')
+        filenames = f"{date} - {tab_l[1]}"
+    
+        if filenames.endswith('00'):
+            tab1_label = filenames
+        elif filenames.endswith('06'):
+            tab2_label = filenames
+        elif filenames.endswith('12'):
+            tab3_label = filenames
+        elif filenames.endswith('18'):
+            tab4_label = filenames
+
     r = re.compile(f"_{cycle_hour}$")
     try:
         fn = list(filter(r.search, report_ls))[0]
     except:
-        return None, "Could not find data for this cycle atm", refresh
+        return None, None, None, tab1_label, tab2_label, tab3_label, tab4_label
 
     cycle_date = extract_date(fn)
     filename = f"./reports/{fn}"
@@ -198,24 +215,6 @@ def update_table(n, cycle_hour):
     title = datetime.strptime(title,'%Y-%m-%d')
     title = title.strftime("%d-%m-%Y")
     title = f"today's date: {title}"
-
-    tabs_labels = []
-    for file in report_ls[:-1]:
-        tab_l = extract_date(file)
-        date = datetime.strptime(tab_l[0],'%Y-%m-%d')
-        date = date.strftime('%d-%m-%Y')
-        filenames = f"{date} - {tab_l[1]}"
-        tabs_labels.append(filenames)
-    
-    for i in tabs_labels:
-        if i.endswith(str(00)):
-            tab1_label = i
-        if i.endswith(str('{:02d}'.format(6))):
-            tab2_label = i
-        if i.endswith(str(12)):
-            tab3_label = i
-        if i.endswith(str(18)):
-            tab4_label = i
     
 
     table = dash_table.DataTable(id="table",
@@ -233,9 +232,6 @@ def update_table(n, cycle_hour):
                                  },
                                  style_data_conditional=style_data_conditional
                                  )
-    
-    
-    
     
     return html.Div([table]), title, refresh, tab1_label, tab2_label, tab3_label, tab4_label
 
