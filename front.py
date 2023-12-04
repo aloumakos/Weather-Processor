@@ -9,10 +9,13 @@ import os
 import re
 
 # load_figure_template('darkly')
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
-app = dash.Dash(__name__)
+app = dash.Dash(title="Based", update_title=None )
 app.config.external_stylesheets = [dbc.themes.DARKLY]
-app.title = 'Based'
+
 app._favicon = ("peeporain.gif")
 
 server = app.server
@@ -45,24 +48,31 @@ tab_selected_style = {
     
 }
 
+def extract_date(filename):
+    parts = filename.split('_')
+    date_part = parts[1]
+    cycle_part = parts[2]
+    return date_part, cycle_part
+
+
 app.layout = html.Div(
     style={'textAlign': 'center', 'font-family': "Lucida Console, monospace", },
     children=[
         html.Div(id="countdown-output"),
         dcc.Interval(
             id="interval-component-countdown",
-            interval=1000,  # in milliseconds
+            interval=100,  # in milliseconds
             n_intervals=0,
         ),
-        html.H1(children="hello werld", style={'textAlign': 'center', 'padding-top': '30px','padding-bottom':'40px'}),
-        dbc.Progress(id='progress-bar',value=0, max=30,style={'margin-bottom':'10px'}),
-        dcc.Tabs(id='tabs', value='tab-00', children=[
-            dcc.Tab(label='cycle 00', value='tab-00',style=tab_style, selected_style=tab_selected_style),
-            dcc.Tab(label='cycle 06', value='tab-06',style=tab_style, selected_style=tab_selected_style),
-            dcc.Tab(label='cycle 12', value='tab-12',style=tab_style, selected_style=tab_selected_style),
-            dcc.Tab(label='cycle 18', value='tab-18',style=tab_style, selected_style=tab_selected_style),
-        ],
-        style={'backgroundColor': 'transparent'}),
+        html.Div([
+        html.Img(src="assets/PepoG.png", style={'width': '6%', 'height': 'auto'}),
+    ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
+        dcc.Tabs(id='tabs', value='tab-00', style={'display':'inline-block'},children=[
+            dcc.Tab(id='tab1',label='', value='tab-00',style=tab_style, selected_style=tab_selected_style),
+            dcc.Tab(id='tab2',label='', value='tab-06',style=tab_style, selected_style=tab_selected_style),
+            dcc.Tab(id='tab3',label='', value='tab-12',style=tab_style, selected_style=tab_selected_style),
+            dcc.Tab(id='tab4',label='', value='tab-18',style=tab_style, selected_style=tab_selected_style),
+        ]),
         html.H5(id='title', style={'display':'None'}),
         html.H5(id='current-time', style={'display':'None'}),
         html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','margin': 'auto','display':'inline-block'}),
@@ -71,8 +81,9 @@ app.layout = html.Div(
         #html.H6(id='refresh_cycle', style={'textAlign': 'right', 'padding-top': '20px', 'padding-right': '10px'}),
         html.Div(id='cycle-selection', style={'display': 'none'}),
         html.Br(),
+        html.Div(dbc.Progress(id='progress-bar',value=0, max=30,style={'margin-bottom':'10px','width': '180px'}),style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
         html.Div([
-        html.Img(src="assets/hello_kitty.gif", style={'width': '10%', 'height': 'auto'}),
+        html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'})
 ])
 
@@ -82,7 +93,7 @@ app.layout = html.Div(
     [Input('interval-component-countdown', 'n_intervals')]
 )
 def update_progress_bar(n):
-    progress = n%30
+    progress = (n*0.1)%30
     return progress
 
 
@@ -119,12 +130,6 @@ def update_countdown(n):
 
     return dbc.Alert(cd_output, color="primary"), current_time
 
-def extract_date(filename):
-    parts = filename.split('_')
-    date_part = parts[1]
-    cycle_part = parts[2]
-    return date_part, cycle_part
-
 @app.callback(
     Output('cycle-selection', 'children'),
     [Input('tabs', 'value')]
@@ -136,25 +141,48 @@ def cycle_tab(tab_value):
 @app.callback(Output("table-output", "children"),
               Output("title", "children"),
               Output("refresh_cycle", "children"),
+              Output('tab1','label'),
+              Output('tab2','label'),
+              Output('tab3','label'),
+              Output('tab4','label'),
               [Input("interval-component", "n_intervals"),
                Input("cycle-selection", "children")])
 def update_table(n, cycle_hour):
 
+    
+
     refresh = f"Refreshed {n} times"
 
     report_ls = os.listdir("./reports")
+    tab1_label = tab2_label = tab3_label = tab4_label = "tba"
+    filtered_list = [item for item in report_ls if item.startswith('report_2023')]
+    for file in filtered_list:
+        tab_l = extract_date(file)
+        date = datetime.strptime(tab_l[0],'%Y-%m-%d')
+        date = date.strftime('%d-%m-%Y')
+        filenames = f"{date} - {tab_l[1]}"
+    
+        if filenames.endswith('00'):
+            tab1_label = filenames
+        elif filenames.endswith('06'):
+            tab2_label = filenames
+        elif filenames.endswith('12'):
+            tab3_label = filenames
+        elif filenames.endswith('18'):
+            tab4_label = filenames
+
     r = re.compile(f"_{cycle_hour}$")
     try:
         fn = list(filter(r.search, report_ls))[0]
     except:
-        return None, "Could not find data for this cycle atm", refresh
+        return None, None, None, tab1_label, tab2_label, tab3_label, tab4_label
 
     cycle_date = extract_date(fn)
     filename = f"./reports/{fn}"
 
     report_df = pd.read_csv(filename)
     report_df = report_df.fillna("")
-    report_df = report_df.applymap(lambda x: x.lower() if isinstance(x, str) else x)
+    report_df = report_df.map(lambda x: x.lower() if isinstance(x, str) else x)
     report_df.columns = map(str.lower, report_df.columns)
 
     def calculate_color(value):
@@ -195,6 +223,7 @@ def update_table(n, cycle_hour):
     title = datetime.strptime(title,'%Y-%m-%d')
     title = title.strftime("%d-%m-%Y")
     title = f"today's date: {title}"
+    
 
     table = dash_table.DataTable(id="table",
                                  data=report_df.to_dict("records"),
@@ -211,12 +240,8 @@ def update_table(n, cycle_hour):
                                  },
                                  style_data_conditional=style_data_conditional
                                  )
-    return html.Div([table]), title, refresh
-
-
-
-
-
+    
+    return html.Div([table]), title, refresh, tab1_label, tab2_label, tab3_label, tab4_label
 
 
 if __name__ == "__main__":
