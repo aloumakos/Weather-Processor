@@ -85,10 +85,6 @@ def update_progress_bar(n):
     progress = n%30
     return progress
 
-report_times = [datetime.now().replace(hour=3, minute=0, second=0),
-                datetime.now().replace(hour=8, minute=0, second=0),
-                datetime.now().replace(hour=12, minute=15, second=0),
-                datetime.now().replace(hour=17, minute=50, second=0)]
 
 @app.callback(
     Output("countdown-output", "children"),
@@ -96,15 +92,25 @@ report_times = [datetime.now().replace(hour=3, minute=0, second=0),
     Input("interval-component-countdown", "n_intervals"),
 )
 def update_countdown(n):
+
+    report_times = [datetime.now().replace(hour=3, minute=0, second=0),
+                datetime.now().replace(hour=8, minute=0, second=0),
+                datetime.now().replace(hour=12, minute=15, second=0),
+                datetime.now().replace(hour=17, minute=50, second=0)]
+
     now = datetime.now()
     current_time = now.strftime('%H:%M:%S')
 
     next_report_times = [time for time in report_times if time > now]
 
     if not next_report_times:
+        print('a')
         next_report_time = min(report_times) + timedelta(days=1)
     else:
+        print('b')
         next_report_time = min(next_report_times)
+    
+    print(next_report_time)
 
     time_difference = str(next_report_time - now).split(".")[0]
 
