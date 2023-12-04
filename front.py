@@ -64,7 +64,9 @@ app.layout = html.Div(
             interval=100,  # in milliseconds
             n_intervals=0,
         ),
-        html.H1(children="hello werld", style={'textAlign': 'center', 'padding-top': '30px','padding-bottom':'40px'}),
+        html.Div([
+        html.Img(src="assets/PepoG.png", style={'width': '6%', 'height': 'auto'}),
+    ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
         dcc.Tabs(id='tabs', value='tab-00', style={'display':'inline-block'},children=[
             dcc.Tab(id='tab1',label='', value='tab-00',style=tab_style, selected_style=tab_selected_style),
             dcc.Tab(id='tab2',label='', value='tab-06',style=tab_style, selected_style=tab_selected_style),
@@ -81,7 +83,7 @@ app.layout = html.Div(
         html.Br(),
         html.Div(dbc.Progress(id='progress-bar',value=0, max=30,style={'margin-bottom':'10px','width': '180px'}),style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
         html.Div([
-        html.Img(src="assets/hello_kitty.gif", style={'width': '10%', 'height': 'auto'}),
+        html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'})
 ])
 
