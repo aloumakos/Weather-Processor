@@ -115,13 +115,9 @@ def update_countdown(n):
     next_report_times = [time for time in report_times if time > now]
 
     if not next_report_times:
-        print('a')
         next_report_time = min(report_times) + timedelta(days=1)
     else:
-        print('b')
         next_report_time = min(next_report_times)
-    
-    print(next_report_time)
 
     time_difference = str(next_report_time - now).split(".")[0]
 
