@@ -78,13 +78,10 @@ app.layout = html.Div(
         html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','margin': 'auto','display':'inline-block'}),
         dcc.Interval(id="interval-component", interval=1 * 30 * 1000, n_intervals=0),
         html.H6(id='refresh_cycle', style={'display': 'none'}),
-        #html.H6(id='refresh_cycle', style={'textAlign': 'right', 'padding-top': '20px', 'padding-right': '10px'}),
         html.Div(id='cycle-selection', style={'display': 'none'}),
         html.Br(),
         html.Div(id='progress-bar',style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
-        #html.Div(dbc.Progress(id='progress-bar',value=0, max=30,style={'margin-bottom':'10px','width': '180px'}),style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
-        html.Div([
-        html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
+        html.Div([html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
     html.Div(id='col_len',style={'display':'none'})
 ])
@@ -189,7 +186,7 @@ def update_table(n, cycle_hour):
     report_df = report_df.map(lambda x: x.lower() if isinstance(x, str) else x)
     report_df.columns = map(str.lower, report_df.columns)
     
-    col_len = len(report_df['current fc'])
+    col_len = (report_df['current fc']!='').sum()
 
     def calculate_color(value):
         try:
@@ -251,4 +248,4 @@ def update_table(n, cycle_hour):
 
 
 if __name__ == "__main__":
-    app.run_server(port=8050,debug=True)
+    app.run_server(port=8050)
