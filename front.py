@@ -48,7 +48,7 @@ tab_selected_style = {
     
 }
 
-col_len = 0
+col_len = 16
 
 def extract_date(filename):
     parts = filename.split('_')
