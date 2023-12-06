@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html
+from dash import dcc, html, clientside_callback, ClientsideFunction
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 from dash import dash_table
@@ -87,17 +87,27 @@ app.layout = html.Div(
 ])
 
 
-@app.callback(
-    Output("progress-bar", "children"),
-    Input('interval-component-countdown', 'n_intervals')
+clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='update_progress_bar'
+    ),
+    Output('progress-bar', 'value'),
+    Output('progress-bar', 'style'),
+    Input("interval-component-countdown", "n_intervals"),
+    Input("col_len", "children")
 )
-def update_progress_bar(n):
-    if col_len is not None and col_len < 16:
-        progress = (n*0.1)%30
-        bar = dbc.Progress(value=progress, max=30,style={'margin-bottom':'10px','width': '180px'})
-    else:
-        bar = dbc.Progress(style={'display':'none'})
-    return bar
+# @app.callback(
+#     Output("progress-bar", "children"),
+#     Input('interval-component-countdown', 'n_intervals')
+# )
+# def update_progress_bar(n):
+#     if col_len is not None and col_len < 16:
+#         progress = (n*0.1)%30
+#         bar = dbc.Progress(value=progress, max=30,style={'margin-bottom':'10px','width': '180px'})
+#     else:
+#         bar = dbc.Progress(style={'display':'none'})
+#     return bar
 
 
 @app.callback(
