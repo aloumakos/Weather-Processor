@@ -1,6 +1,5 @@
 import dash
-from dash import dcc, html, clientside_callback, ClientsideFunction
-from dash.dependencies import Input, Output
+from dash import dcc, html, clientside_callback, ClientsideFunction, Input, Output
 import dash_bootstrap_components as dbc
 from dash import dash_table
 from datetime import datetime,timedelta
@@ -60,7 +59,7 @@ def extract_date(filename):
 app.layout = html.Div(
     style={'textAlign': 'center', 'font-family': "Lucida Console, monospace", },
     children=[
-        html.Div(id="countdown-output"),
+        # html.Div(id="countdown-output"),
         dcc.Interval(
             id="interval-component-countdown",
             interval=100,  # in milliseconds
@@ -81,7 +80,7 @@ app.layout = html.Div(
         html.H6(id='refresh_cycle', style={'display': 'none'}),
         html.Div(id='cycle-selection', style={'display': 'none'}),
         html.Br(),
-        html.Div(dbc.Progress(id='progress-bar'),style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
+        dbc.Progress(id='progress-bar', min=0, max=30, value=0, style={"display":"none"}),
         html.Div([html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
     html.Div(id='col_len', style={'display': 'none'}),
@@ -111,34 +110,34 @@ clientside_callback(
 #     return bar
 
 
-@app.callback(
-    Output("countdown-output", "children"),
-    Output("current-time", "children"),
-    Input("interval-component-countdown", "n_intervals"),
-)
-def update_countdown(n):
+# @app.callback(
+#     Output("countdown-output", "children"),
+#     Output("current-time", "children"),
+#     Input("interval-component-countdown", "n_intervals"),
+# )
+# def update_countdown(n):
 
-    report_times = [datetime.now().replace(hour=3, minute=0, second=0),
-                datetime.now().replace(hour=8, minute=0, second=0),
-                datetime.now().replace(hour=12, minute=15, second=0),
-                datetime.now().replace(hour=17, minute=50, second=0)]
+#     report_times = [datetime.now().replace(hour=3, minute=0, second=0),
+#                 datetime.now().replace(hour=8, minute=0, second=0),
+#                 datetime.now().replace(hour=12, minute=15, second=0),
+#                 datetime.now().replace(hour=17, minute=50, second=0)]
 
-    now = datetime.now()
-    current_time = now.strftime('%H:%M:%S')
+#     now = datetime.now()
+#     current_time = now.strftime('%H:%M:%S')
 
-    next_report_times = [time for time in report_times if time > now]
+#     next_report_times = [time for time in report_times if time > now]
 
-    if not next_report_times:
-        next_report_time = min(report_times) + timedelta(days=1)
-    else:
-        next_report_time = min(next_report_times)
+#     if not next_report_times:
+#         next_report_time = min(report_times) + timedelta(days=1)
+#     else:
+#         next_report_time = min(next_report_times)
 
-    time_difference = str(next_report_time - now).split(".")[0]
+#     time_difference = str(next_report_time - now).split(".")[0]
 
-    cd_output = f"time until next report: {time_difference}"
-    current_time = f"current time: {current_time}"
+#     cd_output = f"time until next report: {time_difference}"
+#     current_time = f"current time: {current_time}"
 
-    return dbc.Alert(cd_output, color="primary"), current_time
+#     return dbc.Alert(cd_output, color="primary"), current_time
 
 @app.callback(
     Output('cycle-selection', 'children'),
