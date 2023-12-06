@@ -188,10 +188,10 @@ def update_table(n, cycle_hour):
     def calculate_color(value):
         try:
             numeric_value = float(value)
-            if -15 < numeric_value <= 0:
+            if -20 < numeric_value <= 0:
                 red_value = int(255 - abs(numeric_value) * 55)
                 return f'rgb(255, {red_value}, {red_value})'
-            elif 0 <= numeric_value < 15:
+            elif 0 <= numeric_value < 20:
                 blue_value = int(255 - abs(numeric_value) * 55)
                 return f'rgb({blue_value}, {blue_value}, 255)'
             else:
