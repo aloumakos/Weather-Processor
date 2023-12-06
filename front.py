@@ -81,7 +81,7 @@ app.layout = html.Div(
         html.H6(id='refresh_cycle', style={'display': 'none'}),
         html.Div(id='cycle-selection', style={'display': 'none'}),
         html.Br(),
-        html.Div(id='progress-bar',style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
+        html.Div(dbc.Progress(id='progress-bar'),style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
         html.Div([html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
     html.Div(id='col_len', style={'display': 'none'}),
