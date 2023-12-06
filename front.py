@@ -241,4 +241,4 @@ def update_table(n, cycle_hour):
 
 
 if __name__ == "__main__":
-    app.run_server(port=8050, debug=True)
+    app.run_server(port=8050)
