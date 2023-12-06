@@ -48,7 +48,7 @@ tab_selected_style = {
     
 }
 
-col_len = 16
+#col_len = 16
 
 def extract_date(filename):
     parts = filename.split('_')
@@ -84,14 +84,17 @@ app.layout = html.Div(
         html.Div(id='progress-bar',style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
         html.Div([html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
+    html.Div(id='col_len', style={'display': 'none'}),
 ])
 
 
 @app.callback(
     Output("progress-bar", "children"),
-    Input('interval-component-countdown', 'n_intervals')
+    Input('interval-component-countdown', 'n_intervals'),
+    Input('col_len', 'children')
+
 )
-def update_progress_bar(n):
+def update_progress_bar(n, col_len):
     if col_len is not None and col_len < 16:
         progress = (n*0.1)%30
         bar = dbc.Progress(value=progress, max=30,style={'margin-bottom':'10px','width': '180px'})
@@ -139,6 +142,7 @@ def cycle_tab(tab_value):
 
 @app.callback([Output("table-output", "children"),
               Output("refresh_cycle", "children"),
+              Output("col_len", "children"),
               Output('tab1','label'),
               Output('tab2','label'),
               Output('tab3','label'),
@@ -147,7 +151,7 @@ def cycle_tab(tab_value):
                Input("cycle-selection", "children")])
 def update_table(n, cycle_hour):
 
-    global col_len
+    #global col_len
 
     refresh = f"Refreshed {n} times"
 
@@ -173,7 +177,7 @@ def update_table(n, cycle_hour):
     try:
         fn = list(filter(r.search, report_ls))[0]
     except:
-        return None, None, tab1_label, tab2_label, tab3_label, tab4_label
+        return None, None,None, tab1_label, tab2_label, tab3_label, tab4_label
 
     cycle_date = extract_date(fn)
     filename = f"./reports/{fn}"
@@ -237,7 +241,7 @@ def update_table(n, cycle_hour):
                                  style_data_conditional=style_data_conditional
                                  )
     
-    return html.Div([table]), refresh,tab1_label, tab2_label, tab3_label, tab4_label
+    return html.Div([table]), refresh,col_len, tab1_label, tab2_label, tab3_label, tab4_label
 
 
 if __name__ == "__main__":
