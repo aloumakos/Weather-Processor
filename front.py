@@ -48,6 +48,8 @@ tab_selected_style = {
     
 }
 
+col_len = 0
+
 def extract_date(filename):
     parts = filename.split('_')
     date_part = parts[1]
@@ -73,28 +75,29 @@ app.layout = html.Div(
             dcc.Tab(id='tab3',label='', value='tab-12',style=tab_style, selected_style=tab_selected_style),
             dcc.Tab(id='tab4',label='', value='tab-18',style=tab_style, selected_style=tab_selected_style),
         ]),
-        html.H5(id='title', style={'display':'None'}),
         html.H5(id='current-time', style={'display':'None'}),
         html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','margin': 'auto','display':'inline-block'}),
         dcc.Interval(id="interval-component", interval=1 * 30 * 1000, n_intervals=0),
         html.H6(id='refresh_cycle', style={'display': 'none'}),
-        #html.H6(id='refresh_cycle', style={'textAlign': 'right', 'padding-top': '20px', 'padding-right': '10px'}),
         html.Div(id='cycle-selection', style={'display': 'none'}),
         html.Br(),
-        html.Div(dbc.Progress(id='progress-bar',value=0, max=30,style={'margin-bottom':'10px','width': '180px'}),style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
-        html.Div([
-        html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
-    ], style={'bottom': 0, 'left': 0, 'width': '100%'})
+        html.Div(id='progress-bar',style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
+        html.Div([html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
+    ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
 ])
 
 
 @app.callback(
-    Output("progress-bar", "value"),
-    [Input('interval-component-countdown', 'n_intervals')]
+    Output("progress-bar", "children"),
+    Input('interval-component-countdown', 'n_intervals')
 )
 def update_progress_bar(n):
-    progress = (n*0.1)%30
-    return progress
+    if col_len is not None and col_len < 16:
+        progress = (n*0.1)%30
+        bar = dbc.Progress(value=progress, max=30,style={'margin-bottom':'10px','width': '180px'})
+    else:
+        bar = dbc.Progress(style={'display':'none'})
+    return bar
 
 
 @app.callback(
@@ -134,23 +137,22 @@ def cycle_tab(tab_value):
     cycle_hour = tab_value.split('-')[1] if tab_value else '00'
     return cycle_hour
 
-@app.callback(Output("table-output", "children"),
-              Output("title", "children"),
+@app.callback([Output("table-output", "children"),
               Output("refresh_cycle", "children"),
               Output('tab1','label'),
               Output('tab2','label'),
               Output('tab3','label'),
-              Output('tab4','label'),
+              Output('tab4','label'),],
               [Input("interval-component", "n_intervals"),
                Input("cycle-selection", "children")])
 def update_table(n, cycle_hour):
 
-    
+    global col_len
 
     refresh = f"Refreshed {n} times"
 
     report_ls = os.listdir("./reports")
-    tab1_label = tab2_label = tab3_label = tab4_label = "tba"
+    tab1_label = tab2_label = tab3_label = tab4_label = "TBA"
     filtered_list = [item for item in report_ls if item.startswith('report_2023')]
     for file in filtered_list:
         tab_l = extract_date(file)
@@ -171,7 +173,7 @@ def update_table(n, cycle_hour):
     try:
         fn = list(filter(r.search, report_ls))[0]
     except:
-        return None, None, None, tab1_label, tab2_label, tab3_label, tab4_label
+        return None, None, tab1_label, tab2_label, tab3_label, tab4_label
 
     cycle_date = extract_date(fn)
     filename = f"./reports/{fn}"
@@ -180,14 +182,16 @@ def update_table(n, cycle_hour):
     report_df = report_df.fillna("")
     report_df = report_df.map(lambda x: x.lower() if isinstance(x, str) else x)
     report_df.columns = map(str.lower, report_df.columns)
+    
+    col_len = (report_df['current fc']!='').sum()
 
     def calculate_color(value):
         try:
             numeric_value = float(value)
-            if -15 < numeric_value < 0:
+            if -15 < numeric_value <= 0:
                 red_value = int(255 - abs(numeric_value) * 55)
                 return f'rgb(255, {red_value}, {red_value})'
-            elif 0 < numeric_value < 15:
+            elif 0 <= numeric_value < 15:
                 blue_value = int(255 - abs(numeric_value) * 55)
                 return f'rgb({blue_value}, {blue_value}, 255)'
             else:
@@ -215,10 +219,6 @@ def update_table(n, cycle_hour):
 
     style_data_conditional = style_data_conditional_first_col + style_conditions
 
-    title = cycle_date[0]
-    title = datetime.strptime(title,'%Y-%m-%d')
-    title = title.strftime("%d-%m-%Y")
-    title = f"today's date: {title}"
     
 
     table = dash_table.DataTable(id="table",
@@ -237,7 +237,7 @@ def update_table(n, cycle_hour):
                                  style_data_conditional=style_data_conditional
                                  )
     
-    return html.Div([table]), title, refresh, tab1_label, tab2_label, tab3_label, tab4_label
+    return html.Div([table]), refresh,tab1_label, tab2_label, tab3_label, tab4_label
 
 
 if __name__ == "__main__":
