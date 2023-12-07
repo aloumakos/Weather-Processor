@@ -28,11 +28,14 @@ tab_style = {
     'borderBottom': '1px solid #0a0a0a',
     'borderLeft': '1px solid #0a0a0a',
     'borderRight': '1px solid #0a0a0a',
-    'padding': '15px',
+    'padding-bottom': '39px',
     'color': 'black',
     'backgroundColor': '#779ECB',
     'border-radius':'20px',
-    'margin':"5px"
+    'margin':'5px',
+    'width':'330px',
+    'height':'50px'
+    
 }
 
 tab_selected_style = {
@@ -42,9 +45,11 @@ tab_selected_style = {
     'borderRight': '5px solid #779ECB',
     'backgroundColor': '#386394',
     'color': 'white',
-    'padding': '16px',
+    'padding-bottom': '40px',
     'fontWeight': 'bold',
-    'border-radius':'20px'
+    'border-radius':'20px',
+    'width':'330px',
+    'height':'50px'
     
 }
 
@@ -69,7 +74,7 @@ app.layout = html.Div(
         html.Div([
         html.Img(src="assets/PepoG.png", style={'width': '6%', 'height': 'auto'}),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
-        dcc.Tabs(id='tabs', value='tab-00', style={'display':'inline-block'},children=[
+        dcc.Tabs(id='tabs', value='tab-00', style={'margin':'auto'},children=[
             dcc.Tab(id='tab1',label='', value='tab-00',style=tab_style, selected_style=tab_selected_style),
             dcc.Tab(id='tab2',label='', value='tab-06',style=tab_style, selected_style=tab_selected_style),
             dcc.Tab(id='tab3',label='', value='tab-12',style=tab_style, selected_style=tab_selected_style),
@@ -241,4 +246,4 @@ def update_table(n, cycle_hour):
 
 
 if __name__ == "__main__":
-    app.run_server(port=8050)
+    app.run_server(port=8050, debug=True)
