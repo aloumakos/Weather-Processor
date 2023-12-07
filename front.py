@@ -59,7 +59,7 @@ def extract_date(filename):
 app.layout = html.Div(
     style={'textAlign': 'center', 'font-family': "Lucida Console, monospace", },
     children=[
-        # html.Div(id="countdown-output"),
+        dbc.Alert(id="countdown", color="primary"),
         dcc.Interval(
             id="interval-component-countdown",
             interval=100,  # in milliseconds
@@ -80,22 +80,21 @@ app.layout = html.Div(
         html.H6(id='refresh_cycle', style={'display': 'none'}),
         html.Div(id='cycle-selection', style={'display': 'none'}),
         html.Br(),
-        dbc.Progress(id='progress-bar', min=0, max=30, value=0, style={"display":"none"}),
+        html.Div(id='progress-div', children=[dbc.Progress(id='progress-bar', min=0, max=30, value=0, style={'margin-bottom':'10px','width': '180px'})],style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
         html.Div([html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
     html.Div(id='col_len', style={'display': 'none'}),
 ])
-
 
 clientside_callback(
     ClientsideFunction(
         namespace='clientside',
         function_name='update_progress_bar'
     ),
-    Output('progress-bar', 'value'),
-    Output('progress-bar', 'style'),
-    Input("interval-component-countdown", "n_intervals"),
-    Input("col_len", "children")
+    [Output('progress-bar', 'value'),
+    Output('progress-div', 'style')],
+    [Input("interval-component-countdown", "n_intervals"),
+    Input("col_len", "children")]
 )
 # @app.callback(
 #     Output("progress-bar", "children"),
@@ -108,7 +107,14 @@ clientside_callback(
 #     else:
 #         bar = dbc.Progress(style={'display':'none'})
 #     return bar
-
+clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='update_countdown'
+    ),
+    Output('countdown', 'children'),
+    Input("interval-component-countdown", "n_intervals")
+)
 
 # @app.callback(
 #     Output("countdown-output", "children"),
