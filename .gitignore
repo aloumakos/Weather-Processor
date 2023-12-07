@@ -10,3 +10,5 @@ report_2023-11-14_18
 report_2023-11-15_00
 test_component.py
 front_v2.py
+*.gif
+*.png
