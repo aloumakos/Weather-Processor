@@ -2,12 +2,11 @@ import dash
 from dash import dcc, html, clientside_callback, ClientsideFunction, Input, Output
 import dash_bootstrap_components as dbc
 from dash import dash_table
-from datetime import datetime,timedelta
+from datetime import datetime
 import pandas as pd
 import os
 import re
 
-# load_figure_template('darkly')
 import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -47,8 +46,6 @@ tab_selected_style = {
     
 }
 
-#col_len = 16
-
 def extract_date(filename):
     parts = filename.split('_')
     date_part = parts[1]
@@ -62,7 +59,7 @@ app.layout = html.Div(
         dbc.Alert(id="countdown", color="primary"),
         dcc.Interval(
             id="interval-component-countdown",
-            interval=100,  # in milliseconds
+            interval=100, 
             n_intervals=0,
         ),
         html.Div([
@@ -74,10 +71,8 @@ app.layout = html.Div(
             dcc.Tab(id='tab3',label='', value='tab-12',style=tab_style, selected_style=tab_selected_style),
             dcc.Tab(id='tab4',label='', value='tab-18',style=tab_style, selected_style=tab_selected_style),
         ]),
-        html.H5(id='current-time', style={'display':'None'}),
         html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','margin': 'auto','display':'inline-block'}),
         dcc.Interval(id="interval-component", interval=1 * 30 * 1000, n_intervals=0),
-        html.H6(id='refresh_cycle', style={'display': 'none'}),
         html.Div(id='cycle-selection', style={'display': 'none'}),
         html.Br(),
         html.Div(id='progress-div', children=[dbc.Progress(id='progress-bar', min=0, max=30, value=0, style={'margin-bottom':'10px','width': '180px'})],style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
@@ -96,17 +91,7 @@ clientside_callback(
     [Input("interval-component-countdown", "n_intervals"),
     Input("col_len", "children")]
 )
-# @app.callback(
-#     Output("progress-bar", "children"),
-#     Input('interval-component-countdown', 'n_intervals')
-# )
-# def update_progress_bar(n):
-#     if col_len is not None and col_len < 16:
-#         progress = (n*0.1)%30
-#         bar = dbc.Progress(value=progress, max=30,style={'margin-bottom':'10px','width': '180px'})
-#     else:
-#         bar = dbc.Progress(style={'display':'none'})
-#     return bar
+
 clientside_callback(
     ClientsideFunction(
         namespace='clientside',
@@ -115,35 +100,6 @@ clientside_callback(
     Output('countdown', 'children'),
     Input("interval-component-countdown", "n_intervals")
 )
-
-# @app.callback(
-#     Output("countdown-output", "children"),
-#     Output("current-time", "children"),
-#     Input("interval-component-countdown", "n_intervals"),
-# )
-# def update_countdown(n):
-
-#     report_times = [datetime.now().replace(hour=3, minute=0, second=0),
-#                 datetime.now().replace(hour=8, minute=0, second=0),
-#                 datetime.now().replace(hour=12, minute=15, second=0),
-#                 datetime.now().replace(hour=17, minute=50, second=0)]
-
-#     now = datetime.now()
-#     current_time = now.strftime('%H:%M:%S')
-
-#     next_report_times = [time for time in report_times if time > now]
-
-#     if not next_report_times:
-#         next_report_time = min(report_times) + timedelta(days=1)
-#     else:
-#         next_report_time = min(next_report_times)
-
-#     time_difference = str(next_report_time - now).split(".")[0]
-
-#     cd_output = f"time until next report: {time_difference}"
-#     current_time = f"current time: {current_time}"
-
-#     return dbc.Alert(cd_output, color="primary"), current_time
 
 @app.callback(
     Output('cycle-selection', 'children'),
@@ -154,7 +110,6 @@ def cycle_tab(tab_value):
     return cycle_hour
 
 @app.callback([Output("table-output", "children"),
-              Output("refresh_cycle", "children"),
               Output("col_len", "children"),
               Output('tab1','label'),
               Output('tab2','label'),
@@ -163,10 +118,6 @@ def cycle_tab(tab_value):
               [Input("interval-component", "n_intervals"),
                Input("cycle-selection", "children")])
 def update_table(n, cycle_hour):
-
-    #global col_len
-
-    refresh = f"Refreshed {n} times"
 
     report_ls = os.listdir("./reports")
     tab1_label = tab2_label = tab3_label = tab4_label = "TBA"
@@ -190,7 +141,7 @@ def update_table(n, cycle_hour):
     try:
         fn = list(filter(r.search, report_ls))[0]
     except:
-        return None, None,None, tab1_label, tab2_label, tab3_label, tab4_label
+        return None,None, tab1_label, tab2_label, tab3_label, tab4_label
 
     cycle_date = extract_date(fn)
     filename = f"./reports/{fn}"
@@ -254,7 +205,7 @@ def update_table(n, cycle_hour):
                                  style_data_conditional=style_data_conditional
                                  )
     
-    return html.Div([table]), refresh,col_len, tab1_label, tab2_label, tab3_label, tab4_label
+    return html.Div([table]), col_len, tab1_label, tab2_label, tab3_label, tab4_label
 
 
 if __name__ == "__main__":
