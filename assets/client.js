@@ -19,6 +19,8 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             next_report_time.setUTCDate(next_report_time.getUTCDate() + 1);
             next_report_time.setUTCHours(1, 0, 0, 0);
 
+
+            var report = '18';
             for (let time of report_times) {
                 if (time > now) {
                     next_report_time = time;
