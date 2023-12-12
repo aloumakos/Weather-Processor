@@ -12,6 +12,7 @@ from tqdm import tqdm
 import numpy as np
 import re
 from bootstrap import upload_report, delete_report
+import json
 
 parser = argparse.ArgumentParser(
                     prog='Get Weather Data',
@@ -21,7 +22,8 @@ parser.add_argument('-d',)
 parser.add_argument('-c',)  
 args = parser.parse_args()
 
-
+with open('normal_tdd.json', 'r') as openfile:
+    normal_dict = json.load(openfile)
 ct_df = pd.read_csv("usregions.csv")[:30000]
 lls = list(zip(ct_df['lat'], ct_df['lng']))
 
@@ -78,6 +80,8 @@ def _combine_reports(current_cycle, past_cycle, last_forecast):
 
 report_dict = {
         "Date": [(dt+relativedelta(days=i)).strftime("%a, %d %b %Y") for i in range(1,16)],
+        "Normal": [normal_dict[(dt+relativedelta(days=i)).strftime("%d-%m")] for i in range(1,16)],
+        "Diff from normal": [],
         "Current FC": [],
         "FC 6 hours ago": _combine_reports(int(cycle),(int(cycle)-6)%24, last_report['Current FC']),
         "FC 12 hours ago": _combine_reports(int(cycle),(int(cycle)-6)%24, last_report['FC 6 hours ago']),
@@ -86,7 +90,6 @@ report_dict = {
         "Diff 12 hours ago": [],
         "Diff 24 hours ago": []
     }
-
 
 files = []
 for i in range(24-int(cycle),243,3):
@@ -133,11 +136,12 @@ while files:
             report_dict['Current FC'].append(national_dd)
             
             report_df = pd.DataFrame(dict([ (k,pd.Series(v,dtype=np.float16)) if k != 'Date' else (k,pd.Series(v)) for k,v in report_dict.items() ]))
+            report_df['Diff from normal'] = report_df['Current FC']-report_df['Diff from normal']
             report_df['Diff 12 hours ago'] = report_df['Current FC']-report_df['FC 12 hours ago']
             report_df['Diff 24 hours ago'] = report_df['Current FC']-report_df['FC 24 hours ago']
             report_df.loc['Total']= report_df[report_df.columns[1:]][:-1].sum(min_count=1)
             report_df = report_df.round(2)
-            report_df.to_csv(f'reports/report_{ dt.strftime("%Y-%m-%d")}_{cycle}', index=False)
+            report_df.drop(columns=['Normal']).to_csv(f'reports/report_{ dt.strftime("%Y-%m-%d")}_{cycle}', index=False)
             
             cycles = []
         client.download_file('noaa-gefs-pds', files[0], 'temp')

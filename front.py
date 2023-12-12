@@ -1,17 +1,18 @@
 import dash
-from dash import dcc, html, clientside_callback, ClientsideFunction, Input, Output
+from dash import dcc, html, clientside_callback, ClientsideFunction, Input, Output, State
 import dash_bootstrap_components as dbc
 from dash import dash_table
 from datetime import datetime
 import pandas as pd
 import os
 import re
+import random
 
 import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
-app = dash.Dash(title="Based", update_title=None )
+app = dash.Dash(title="BASED", update_title=None )
 app.config.external_stylesheets = [dbc.themes.DARKLY]
 
 app._favicon = ("peeporain.gif")
@@ -26,11 +27,14 @@ tab_style = {
     'borderBottom': '1px solid #0a0a0a',
     'borderLeft': '1px solid #0a0a0a',
     'borderRight': '1px solid #0a0a0a',
-    'padding': '15px',
+    'padding-bottom': '39px',
     'color': 'black',
     'backgroundColor': '#779ECB',
     'border-radius':'20px',
-    'margin':"5px"
+    'margin':'5px',
+    'width':'330px',
+    'height':'50px'
+    
 }
 
 tab_selected_style = {
@@ -40,18 +44,22 @@ tab_selected_style = {
     'borderRight': '5px solid #779ECB',
     'backgroundColor': '#386394',
     'color': 'white',
-    'padding': '16px',
+    'padding-bottom': '40px',
     'fontWeight': 'bold',
-    'border-radius':'20px'
+    'border-radius':'20px',
+    'width':'330px',
+    'height':'50px'
     
 }
 
+icons = os.listdir('./assets/icons')
+full_paths = [os.path.join('./assets/icons', icon) for icon in icons]
+print(random.choice(full_paths))
 def extract_date(filename):
     parts = filename.split('_')
     date_part = parts[1]
     cycle_part = parts[2]
     return date_part, cycle_part
-
 
 app.layout = html.Div(
     style={'textAlign': 'center', 'font-family': "Lucida Console, monospace", },
@@ -63,9 +71,9 @@ app.layout = html.Div(
             n_intervals=0,
         ),
         html.Div([
-        html.Img(src="assets/PepoG.png", style={'width': '6%', 'height': 'auto'}),
+        #html.Img(id='peepo', style={'width': '6%', 'height': 'auto'}),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
-        dcc.Tabs(id='tabs', value='tab-00', style={'display':'inline-block'},children=[
+        dcc.Tabs(id='tabs', value='tab-00', style={'margin':'auto'},children=[
             dcc.Tab(id='tab1',label='', value='tab-00',style=tab_style, selected_style=tab_selected_style),
             dcc.Tab(id='tab2',label='', value='tab-06',style=tab_style, selected_style=tab_selected_style),
             dcc.Tab(id='tab3',label='', value='tab-12',style=tab_style, selected_style=tab_selected_style),
@@ -74,11 +82,14 @@ app.layout = html.Div(
         html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','margin': 'auto','display':'inline-block'}),
         dcc.Interval(id="interval-component", interval=1 * 30 * 1000, n_intervals=0),
         html.Div(id='cycle-selection', style={'display': 'none'}),
+        html.Div(id='filtered_list', style={'display': 'none'}),
         html.Br(),
         html.Div(id='progress-div', children=[dbc.Progress(id='progress-bar', min=0, max=30, value=0, style={'margin-bottom':'10px','width': '180px'})],style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
         html.Div([html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
+                  html.Img(id='peepo', style={'width': '6%', 'height': 'auto'}, ),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
     html.Div(id='col_len', style={'display': 'none'}),
+    html.Div(id='peepo-flag', children=0, style={'display': 'none'}),
 ])
 
 clientside_callback(
@@ -111,13 +122,15 @@ def cycle_tab(tab_value):
 
 @app.callback([Output("table-output", "children"),
               Output("col_len", "children"),
+              Output("filtered_list", "children"),
+              Output("peepo", "src"),
               Output('tab1','label'),
               Output('tab2','label'),
               Output('tab3','label'),
               Output('tab4','label'),],
-              [Input("interval-component", "n_intervals"),
-               Input("cycle-selection", "children")])
-def update_table(n, cycle_hour):
+              Input("interval-component", "n_intervals"),
+               Input("cycle-selection", "children"),State('peepo-flag', 'children'))
+def update_table(n, cycle_hour, peepo_flag ):
 
     report_ls = os.listdir("./reports")
     tab1_label = tab2_label = tab3_label = tab4_label = "TBA"
@@ -141,9 +154,8 @@ def update_table(n, cycle_hour):
     try:
         fn = list(filter(r.search, report_ls))[0]
     except:
-        return None,None, tab1_label, tab2_label, tab3_label, tab4_label
+        return None,None,None,None, tab1_label, tab2_label, tab3_label, tab4_label
 
-    cycle_date = extract_date(fn)
     filename = f"./reports/{fn}"
 
     report_df = pd.read_csv(filename)
@@ -152,6 +164,12 @@ def update_table(n, cycle_hour):
     report_df.columns = map(str.lower, report_df.columns)
     
     col_len = (report_df['current fc']!='').sum()
+
+    if col_len < 16 and peepo_flag==0:
+        peepo = random.choice(full_paths)
+        peepo_flag = 1
+    elif col_len == 16:
+        peepo_flag = 0
 
     def calculate_color(value):
         try:
@@ -205,7 +223,7 @@ def update_table(n, cycle_hour):
                                  style_data_conditional=style_data_conditional
                                  )
     
-    return html.Div([table]), col_len, tab1_label, tab2_label, tab3_label, tab4_label
+    return html.Div([table]), col_len, filtered_list, peepo, tab1_label, tab2_label, tab3_label, tab4_label
 
 
 if __name__ == "__main__":
