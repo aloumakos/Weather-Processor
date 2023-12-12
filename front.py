@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, clientside_callback, ClientsideFunction, Input, Output
+from dash import dcc, html, clientside_callback, ClientsideFunction, Input, Output, State
 import dash_bootstrap_components as dbc
 from dash import dash_table
 from datetime import datetime
@@ -12,7 +12,7 @@ import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
-app = dash.Dash(title="Based", update_title=None )
+app = dash.Dash(title="BASED", update_title=None )
 app.config.external_stylesheets = [dbc.themes.DARKLY]
 
 app._favicon = ("peeporain.gif")
@@ -52,11 +52,9 @@ tab_selected_style = {
     
 }
 
-peepo_flag = 0
-#peepo = './assets/icons/PepoG.png'
-#print('outside peepo', peepo)
-#print('outside flag', peepo)
-
+icons = os.listdir('./assets/icons')
+full_paths = [os.path.join('./assets/icons', icon) for icon in icons]
+print(random.choice(full_paths))
 def extract_date(filename):
     parts = filename.split('_')
     date_part = parts[1]
@@ -88,9 +86,10 @@ app.layout = html.Div(
         html.Br(),
         html.Div(id='progress-div', children=[dbc.Progress(id='progress-bar', min=0, max=30, value=0, style={'margin-bottom':'10px','width': '180px'})],style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
         html.Div([html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
-                  html.Img(id='peepo', style={'width': '6%', 'height': 'auto'}),
+                  html.Img(id='peepo', style={'width': '6%', 'height': 'auto'}, ),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
     html.Div(id='col_len', style={'display': 'none'}),
+    html.Div(id='peepo-flag', children=0, style={'display': 'none'}),
 ])
 
 clientside_callback(
@@ -129,12 +128,9 @@ def cycle_tab(tab_value):
               Output('tab2','label'),
               Output('tab3','label'),
               Output('tab4','label'),],
-              [Input("interval-component", "n_intervals"),
-               Input("cycle-selection", "children")])
-def update_table(n, cycle_hour):
-
-    global peepo_flag
-    global peepo
+              Input("interval-component", "n_intervals"),
+               Input("cycle-selection", "children"),State('peepo-flag', 'children'))
+def update_table(n, cycle_hour, peepo_flag ):
 
     report_ls = os.listdir("./reports")
     tab1_label = tab2_label = tab3_label = tab4_label = "TBA"
@@ -160,7 +156,6 @@ def update_table(n, cycle_hour):
     except:
         return None,None,None,None, tab1_label, tab2_label, tab3_label, tab4_label
 
-    cycle_date = extract_date(fn)
     filename = f"./reports/{fn}"
 
     report_df = pd.read_csv(filename)
@@ -169,10 +164,6 @@ def update_table(n, cycle_hour):
     report_df.columns = map(str.lower, report_df.columns)
     
     col_len = (report_df['current fc']!='').sum()
-
-    directory_path = './assets/icons'
-    icons = os.listdir('./assets/icons')
-    full_paths = [os.path.join(directory_path, icon)for icon in icons]
 
     if col_len < 16 and peepo_flag==0:
         peepo = random.choice(full_paths)
@@ -236,4 +227,4 @@ def update_table(n, cycle_hour):
 
 
 if __name__ == "__main__":
-    app.run_server(port=8050, debug=True)
+    app.run_server(port=8050)
