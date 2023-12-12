@@ -19,9 +19,26 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             next_report_time.setUTCDate(next_report_time.getUTCDate() + 1);
             next_report_time.setUTCHours(1, 0, 0, 0);
 
+
+            var report = '18';
             for (let time of report_times) {
                 if (time > now) {
                     next_report_time = time;
+                    
+                    switch (report_times.indexOf(time)) {
+                        case 0:
+                            report = '18';
+                            break;
+                        case 1:
+                            report = '00';
+                            break;
+                        case 2:
+                            report = '06';
+                            break;
+                        case 3:
+                            report = '12';
+                            break;
+                    }
                     break;
                 }   
               }
@@ -30,7 +47,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             var date = new Date(0);
             date.setMilliseconds(time_difference); 
             var timeString = date.toISOString().substring(11, 19);         
-            return `time until next report: ${timeString}`
+            return `time until report[${report}]: ${timeString}`
         }
     }
 });
