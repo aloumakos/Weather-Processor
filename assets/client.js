@@ -47,7 +47,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             var date = new Date(0);
             date.setMilliseconds(time_difference); 
             var timeString = date.toISOString().substring(11, 19);         
-            return `time until next report[${report}]: ${timeString}`
+            return `time until report[${report}]: ${timeString}`
         }
     }
 });
