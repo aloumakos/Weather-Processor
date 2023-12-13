@@ -12,7 +12,9 @@ import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
-app = dash.Dash(title="BASED", update_title=None )
+app = dash.Dash(title="BASED", update_title=None,meta_tags=[
+                {"name": "viewport", "content": "width=device-width, initial-scale=1"}
+            ],)
 app.config.external_stylesheets = [dbc.themes.DARKLY]
 
 app._favicon = ("peeporain.gif")
