@@ -136,7 +136,7 @@ while files:
             report_dict['Current FC'].append(national_dd)
             
             report_df = pd.DataFrame(dict([ (k,pd.Series(v,dtype=np.float16)) if k != 'Date' else (k,pd.Series(v)) for k,v in report_dict.items() ]))
-            report_df['Diff from normal'] = report_df['Current FC']-report_df['Diff from normal']
+            report_df['Diff from normal'] = report_df['Current FC']-report_df['Normal']
             report_df['Diff 12 hours ago'] = report_df['Current FC']-report_df['FC 12 hours ago']
             report_df['Diff 24 hours ago'] = report_df['Current FC']-report_df['FC 24 hours ago']
             report_df.loc['Total']= report_df[report_df.columns[1:]][:-1].sum(min_count=1)
