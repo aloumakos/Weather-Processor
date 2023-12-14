@@ -56,7 +56,7 @@ tab_selected_style = {
 
 icons = os.listdir('./assets/icons')
 full_paths = [os.path.join('./assets/icons', icon) for icon in icons]
-
+rand_image = random.choice(full_paths)
 def extract_date(filename):
     parts = filename.split('_')
     date_part = parts[1]
@@ -88,7 +88,7 @@ app.layout = html.Div(
         html.Br(),
         html.Div(id='progress-div', children=[dbc.Progress(id='progress-bar', min=0, max=30, value=0, style={'margin-bottom':'10px','width': '180px'})],style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
         html.Div([html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
-                  html.Img(id='peepo', src=random.choice(full_paths), style={'width': '6%', 'height': 'auto'}, ),
+                  html.Img(id='peepo', src=rand_image, style={'width': '6%', 'height': 'auto'}, srcSet=rand_image),
     ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
     html.Div(id='col_len', style={'display': 'none'}),
     html.Div(id='peepo-flag', children=0, style={'display': 'none'}),
@@ -122,7 +122,8 @@ def cycle_tab(tab_value):
     return cycle_hour
 
 @app.callback(
-    Output("peepo", "src"),
+    [Output("peepo", "src"),
+     Output("peepo", "srcSet")],
     [Input("peepo-interval-component", "n_intervals")])
 def peepo(n):
     
@@ -133,7 +134,8 @@ def peepo(n):
     
     for tm in report_times:
         if time.time()-300<tm and time.time()>tm:
-            return random.choice(full_paths)
+            rand_image = random.choice(full_paths)
+            return rand_image, rand_image
         else:
             raise(Exception)   
 
