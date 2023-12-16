@@ -4,8 +4,7 @@ pandas
 tqdm
 dash
 dash_bootstrap_components
-gunicorn
+gunicorn[gevent]
 oauth2client
 google-api-python-client
 python-dotenv
-gevent
