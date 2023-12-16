@@ -12,7 +12,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         update_countdown: function(n) {
             
             var now = new Date().getTime();
-            var report_times = [new Date().setUTCHours(1, 0, 0, 0), new Date().setUTCHours(6, 0, 0, 0), 
+            var report_times = [new Date().setUTCHours(1, 0, 0, 0), new Date().setUTCHours(5, 0, 0, 0), 
                         new Date().setUTCHours(10, 15, 0, 0),
                         new Date().setUTCHours(15, 50, 0, 0)];
             var next_report_time = new Date()

@@ -8,9 +8,10 @@ import os
 import re
 import random
 import time
+from dotenv import load_dotenv
 import logging
 log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+log.setLevel(logging.CRITICAL)
 
 app = dash.Dash(title="&#65279;", update_title=None,meta_tags=[
                 {"name": "viewport", "content": "width=device-width, initial-scale=1"}
@@ -56,7 +57,6 @@ tab_selected_style = {
 
 icons = os.listdir('./assets/icons')
 full_paths = [os.path.join('./assets/icons', icon) for icon in icons]
-rand_image = random.choice(full_paths)
 
 def extract_date(filename):
     parts = filename.split('_')
@@ -64,7 +64,13 @@ def extract_date(filename):
     cycle_part = parts[2]
     return date_part, cycle_part
 
-app.layout = html.Div(
+def serve_layout():
+
+    load_dotenv(override=True)
+    random.seed(os.environ['RAND'])
+    rand_image = random.choice(full_paths)
+
+    return html.Div(
     style={'textAlign': 'center', 'font-family': "Lucida Console, monospace", },
     children=[
         dbc.Alert(id="countdown", color="primary"),
@@ -82,18 +88,20 @@ app.layout = html.Div(
             dcc.Tab(id='tab4',label='', value='tab-18',style=tab_style, selected_style=tab_selected_style),
         ]),
         html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','margin': 'auto','display':'inline-block'}),
-        dcc.Interval(id="interval-component", interval=1 * 30 * 1000, n_intervals=0),
-        dcc.Interval(id="peepo-interval-component", interval=5 * 60 * 1000, n_intervals=0, disabled=False),
+        dcc.Interval(id="interval-component", interval=1 * 30 * 1000, n_intervals=0,),
+        dcc.Interval(id="peepo-interval-component", interval=5 * 60 * 1000, n_intervals=0),
         html.Div(id='cycle-selection', style={'display': 'none'}),
         html.Div(id='filtered_list', style={'display': 'none'}),
         html.Br(),
         html.Div(id='progress-div', children=[dbc.Progress(id='progress-bar', min=0, max=30, value=0, style={'margin-bottom':'10px','width': '180px'})],style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
         html.Div([html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
-                  html.Div(id='peepo', children = [html.Img( src=rand_image, srcSet=rand_image)],style={"display": "flex", "align-items":"center" , "max-width": '6%'}),
+                  html.Div(id='peepo', children = [html.Img( src=rand_image, srcSet=rand_image, style={"max-width": '100%'})],style={"display": "flex", "align-items":"center" , "max-width": '6%'}),
     ], style={"display": "flex", "justify-content":"center"}),
     html.Div(id='col_len', style={'display': 'none'}),
-    html.Div(id='peepo-flag', children=0, style={'display': 'none'}),
 ])
+
+
+app.layout = serve_layout
 
 clientside_callback(
     ClientsideFunction(
@@ -127,21 +135,23 @@ def cycle_tab(tab_value):
     [Input("peepo-interval-component", "n_intervals")])
 def peepo(n):
     
+    load_dotenv(override=True)
+    random.seed(os.environ['RAND'])
+
     report_times = [datetime.now().replace(hour=3, minute=0, second=0).timestamp(),
-                datetime.now().replace(hour=8, minute=0, second=0).timestamp(),
+                datetime.now().replace(hour=7, minute=0, second=0).timestamp(),
                 datetime.now().replace(hour=12, minute=15, second=0).timestamp(),
                 datetime.now().replace(hour=17, minute=50, second=0).timestamp()]
     
     for tm in report_times:
-        if time.time()-300<tm and time.time()>tm:
+        if time.time()-600<tm and time.time()>tm:
             rand_image = random.choice(full_paths)
-            return html.Img( src=rand_image, srcSet=rand_image ,style={"max-width": '100%'})
-    raise(Exception) 
+            return html.Img( src=rand_image, srcSet=rand_image ,style={"max-height": '100%'})
+    raise SystemExit()
 
 @app.callback([Output("table-output", "children"),
               Output("col_len", "children"),
               Output("filtered_list", "children"),
-              Output("peepo-interval-component", "disabled"),
               Output('tab1','label'),
               Output('tab2','label'),
               Output('tab3','label'),
@@ -172,7 +182,7 @@ def update_table(n, cycle_hour,):
     try:
         fn = list(filter(r.search, report_ls))[0]
     except:
-        return None,None,None, False, tab1_label, tab2_label, tab3_label, tab4_label
+        return None,None,None, tab1_label, tab2_label, tab3_label, tab4_label
 
     filename = f"./reports/{fn}"
 
@@ -183,7 +193,6 @@ def update_table(n, cycle_hour,):
     
     col_len = (report_df['current fc']!='').sum()
 
-    peepo = True if col_len == 16 else False
 
     def calculate_color(value):
         try:
@@ -235,7 +244,7 @@ def update_table(n, cycle_hour,):
                                  style_data_conditional=style_data_conditional
                                  )
     
-    return html.Div([table]), col_len, filtered_list, peepo, tab1_label, tab2_label, tab3_label, tab4_label
+    return html.Div([table]), col_len, filtered_list, tab1_label, tab2_label, tab3_label, tab4_label
 
 
 if __name__ == "__main__":
