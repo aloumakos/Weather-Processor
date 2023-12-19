@@ -23,25 +23,18 @@ app._favicon = ("peeporain.gif")
 server = app.server
 
 tab_style = {
-    'borderTop': '1px solid #0a0a0a',
-    'borderBottom': '1px solid #0a0a0a',
-    'borderLeft': '1px solid #0a0a0a',
-    'borderRight': '1px solid #0a0a0a',
+    'border': '1px solid #0a0a0a',
     'padding-bottom': '39px',
     'color': 'black',
     'backgroundColor': '#779ECB',
     'border-radius':'20px',
     'margin':'5px',
     'width':'330px',
-    'height':'50px',
-    
+    'height':'50px',    
 }
 
 tab_selected_style = {
-    #'borderTop': '5px solid #779ECB',
-    #'borderBottom': '5px solid #779ECB',
-    #'borderLeft': '5px solid #779ECB',
-    #'borderRight': '5px solid #779ECB',
+    'border': '5px solid #779ECB',
     'backgroundColor': '#386394',
     'color': 'white',
     'padding-bottom': '40px',
@@ -78,10 +71,10 @@ def serve_layout():
         html.Div([
     ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
         dcc.Tabs(id='tabs', value='tab-00',style={'margin':'auto'},children=[
-            dcc.Tab(id='tab1',label='', value='tab-00',className='tab-ok',selected_style=tab_selected_style),
-            dcc.Tab(id='tab2',label='', value='tab-06',className='tab-ok',selected_style=tab_selected_style),
-            dcc.Tab(id='tab3',label='', value='tab-12',className='tab-ok',selected_style=tab_selected_style),
-            dcc.Tab(id='tab4',label='', value='tab-18',className='tab-ok',selected_style=tab_selected_style),
+            dcc.Tab(id='tab1',label='', value='tab-00',style=tab_style,selected_style=tab_selected_style),
+            dcc.Tab(id='tab2',label='', value='tab-06',style=tab_style,selected_style=tab_selected_style),
+            dcc.Tab(id='tab3',label='', value='tab-12',style=tab_style,selected_style=tab_selected_style),
+            dcc.Tab(id='tab4',label='', value='tab-18',style=tab_style,selected_style=tab_selected_style),
         ]),
         html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','margin': 'auto',},className="table-size"),
         dcc.Interval(id="interval-component", interval=1 * 30 * 1000, n_intervals=0,),
