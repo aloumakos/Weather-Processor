@@ -1,0 +1,7 @@
+@media screen and (max-width:600px){
+    .table-size{
+        overflow-x:auto;
+    }
+}
+
+
