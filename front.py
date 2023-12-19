@@ -13,7 +13,7 @@ import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.CRITICAL)
 
-app = dash.Dash(title="&#65279;", update_title=None,meta_tags=[
+app = dash.Dash(__name__,title="&#65279;", update_title=None,meta_tags=[
                 {"name": "viewport", "content": "width=device-width, initial-scale=1"}
             ],)
 app.config.external_stylesheets = [dbc.themes.DARKLY]
@@ -22,9 +22,6 @@ app._favicon = ("peeporain.gif")
 
 server = app.server
 
-tabs_styles = {
-    'height': '100px'
-}
 tab_style = {
     'borderTop': '1px solid #0a0a0a',
     'borderBottom': '1px solid #0a0a0a',
@@ -36,23 +33,22 @@ tab_style = {
     'border-radius':'20px',
     'margin':'5px',
     'width':'330px',
-    'height':'50px'
+    'height':'50px',
     
 }
 
 tab_selected_style = {
-    'borderTop': '5px solid #779ECB',
-    'borderBottom': '5px solid #779ECB',
-    'borderLeft': '5px solid #779ECB',
-    'borderRight': '5px solid #779ECB',
+    #'borderTop': '5px solid #779ECB',
+    #'borderBottom': '5px solid #779ECB',
+    #'borderLeft': '5px solid #779ECB',
+    #'borderRight': '5px solid #779ECB',
     'backgroundColor': '#386394',
     'color': 'white',
     'padding-bottom': '40px',
     'fontWeight': 'bold',
     'border-radius':'20px',
     'width':'330px',
-    'height':'50px'
-    
+    'height':'50px',
 }
 
 icons = os.listdir('./assets/icons')
@@ -81,13 +77,13 @@ def serve_layout():
         ),
         html.Div([
     ], style={'bottom': 0, 'left': 0, 'width': '100%'}),
-        dcc.Tabs(id='tabs', value='tab-00', style={'margin':'auto'},children=[
-            dcc.Tab(id='tab1',label='', value='tab-00',style=tab_style, selected_style=tab_selected_style),
-            dcc.Tab(id='tab2',label='', value='tab-06',style=tab_style, selected_style=tab_selected_style),
-            dcc.Tab(id='tab3',label='', value='tab-12',style=tab_style, selected_style=tab_selected_style),
-            dcc.Tab(id='tab4',label='', value='tab-18',style=tab_style, selected_style=tab_selected_style),
+        dcc.Tabs(id='tabs', value='tab-00',style={'margin':'auto'},children=[
+            dcc.Tab(id='tab1',label='', value='tab-00',className='tab-ok',selected_style=tab_selected_style),
+            dcc.Tab(id='tab2',label='', value='tab-06',className='tab-ok',selected_style=tab_selected_style),
+            dcc.Tab(id='tab3',label='', value='tab-12',className='tab-ok',selected_style=tab_selected_style),
+            dcc.Tab(id='tab4',label='', value='tab-18',className='tab-ok',selected_style=tab_selected_style),
         ]),
-        html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','margin': 'auto','display':'inline-block'}),
+        html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','margin': 'auto',},className="table-size"),
         dcc.Interval(id="interval-component", interval=1 * 30 * 1000, n_intervals=0,),
         dcc.Interval(id="peepo-interval-component", interval=5 * 60 * 1000, n_intervals=0),
         html.Div(id='cycle-selection', style={'display': 'none'}),
@@ -190,6 +186,7 @@ def update_table(n, cycle_hour,):
     report_df = report_df.fillna("")
     report_df = report_df.map(lambda x: x.lower() if isinstance(x, str) else x)
     report_df.columns = map(str.lower, report_df.columns)
+
     
     col_len = (report_df['current fc']!='').sum()
 
@@ -197,23 +194,26 @@ def update_table(n, cycle_hour,):
     def calculate_color(value):
         try:
             numeric_value = float(value)
-            if -20 < numeric_value <= 0:
-                red_value = int(255 - abs(numeric_value) * 55)
+            if -30 < numeric_value <= 0:
+                red_value = int(255 - abs(numeric_value) * 85)
                 return f'rgb(255, {red_value}, {red_value})'
-            elif 0 <= numeric_value < 20:
-                blue_value = int(255 - abs(numeric_value) * 55)
+            elif 0 <= numeric_value < 30:
+                blue_value = int(255 - abs(numeric_value) * 85)
                 return f'rgb({blue_value}, {blue_value}, 255)'
             else:
                 return 'rgb(73,77,74)'
         except ValueError:
             return 'rgb(73,77,74)'
+        
+    
+    col_names = ['diff from normal','diff 12 hours ago','diff 24 hours ago']
 
 
     style_conditions = [
         {
             'if': {'column_id': col, 'row_index': i},
-            'backgroundColor': calculate_color(value) if col in report_df.columns[-2:] else 'rgb(73,77,74)',
-            'color': 'black' if col in report_df.columns[-2:] else 'white'
+            'backgroundColor': calculate_color(value) if col in col_names else 'rgb(73,77,74)',
+            'color': 'black' if col in col_names else 'white'
         } for col in report_df.columns[1:] for i, value in enumerate(report_df[col])
     ]
 
@@ -248,4 +248,4 @@ def update_table(n, cycle_hour,):
 
 
 if __name__ == "__main__":
-    app.run_server(port=8050)
+    app.run_server(port=8050, debug=True)
