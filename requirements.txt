@@ -7,4 +7,4 @@ dash_bootstrap_components
 gunicorn[gevent]
 oauth2client
 google-api-python-client
-python-dotenv
+redis[hiredis]
