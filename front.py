@@ -26,12 +26,12 @@ def serve_layout():
     return html.Div(
     style={'textAlign': 'center', 'font-family': "Lucida Console, monospace", },
     children=[ dbc.Alert(id="countdown", color="primary"), dcc.Interval( id="interval-component-countdown", interval=100, n_intervals=0,),
-        dcc.Tabs(id='tabs', value='tab-00',style={'display':'flex', 'align-items': 'center', 'justify-content': 'center'},children=[
+        dcc.Tabs(id='tabs', value='tab-00',style={'display':'flex', 'align-items': 'center', 'justify-content': 'center',},children=[
             dcc.Tab(id='tab1',label='', value='tab-00',className="custom-tab", selected_className="selected-tab"),
             dcc.Tab(id='tab2',label='', value='tab-06',className="custom-tab", selected_className="selected-tab"),
             dcc.Tab(id='tab3',label='', value='tab-12',className="custom-tab", selected_className="selected-tab"),
             dcc.Tab(id='tab4',label='', value='tab-18',className="custom-tab", selected_className="selected-tab"),]),
-        html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','margin': 'auto',},className="table-size"),
+        html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','display':'flex', 'justify-content': 'center',},className="table-size"),
         dcc.Interval(id="interval-component", interval=1 * 30 * 1000, n_intervals=0,),
         dcc.Interval(id="peepo-interval-component", interval=5 * 60 * 1000, n_intervals=0),
         html.Div(id='progress-div', children=[dbc.Progress(id='progress-bar', min=0, max=30, value=0, style={'margin-bottom':'10px','width': '180px'})],style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
@@ -78,7 +78,7 @@ def update_table(n, tab_value, data):
             else: report_df = pd.read_csv(f"./reports/{filename}")
         else: report_df = pd.read_csv(StringIO(fn))
     except:
-         tabs, filename = get_tabs_from_files(report_ls)
+         tabs, filename = get_tabs_from_files(report_ls, cycle_hour)
          report_df = pd.read_csv(f"./reports/{filename}")
          
     report_df = report_df.fillna("")
@@ -98,11 +98,12 @@ def update_table(n, tab_value, data):
                                  data=report_df.to_dict("records"),
                                  columns=[{"name": i, "id": i} for i in report_df.columns],
                                  style_table={'border': '10px solid #313532','border-radius':'5px'},
-                                 style_cell={'textAlign': 'center', 'font-family': 'Lucida Console,monospace','minWidth': '170px','border': '2px solid #3e423f'},
+                                 style_cell={'textAlign': 'center', 'font-family': 'Lucida Console,monospace','minWidth': '170px','border': '2px solid #3e423f','whitespace':'normal'},
+                                 fill_width=False,
                                  style_header={'backgroundColor': 'rgb(30, 30, 30)', 'fontWeight': 'bold', 'color': 'white'},
                                  style_data={'backgroundColor': 'rgb(50, 50, 50)', 'color': 'white'},
                                  style_data_conditional=style_data_conditional)
     return html.Div([table]), data, tabs['00'], tabs['06'], tabs['12'], tabs['18']
 
 if __name__ == "__main__":
-    app.run_server(port=8050,)
+    app.run_server(port=8050)
