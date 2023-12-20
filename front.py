@@ -21,7 +21,8 @@ app.config.external_stylesheets, app._favicon, server = [dbc.themes.DARKLY], ("p
 icon_path = './assets/icons/'
 
 def serve_layout():
-    rand_image = r.get('peepo')
+    try: rand_image = r.get('peepo')
+    except: rand_image = 'pepe-el.gif'
     return html.Div(
     style={'textAlign': 'center', 'font-family': "Lucida Console, monospace", },
     children=[ dbc.Alert(id="countdown", color="primary"), dcc.Interval( id="interval-component-countdown", interval=100, n_intervals=0,),
@@ -54,8 +55,9 @@ clientside_callback(ClientsideFunction(namespace='clientside', function_name='up
     [Output("peepo", "children"), Output('store', 'data', allow_duplicate=True)],
     [Input("peepo-interval-component", "n_intervals"), State('store', 'data'),], prevent_initial_call=True)
 def peepo(n, data):
-    
-    if (rand_image:= r.get('peepo')) == data['peepo']: raise PreventUpdate
+    try: rand_image= r.get('peepo')
+    except: rand_image = 'pepe-el.gif'
+    if (rand_image) == data['peepo']: raise PreventUpdate
     else:
         data['peepo'] = rand_image
         return html.Img( src=f'{icon_path}{rand_image}', srcSet=f'{icon_path}{rand_image}' ,style={"max-height": '100%'},), data
