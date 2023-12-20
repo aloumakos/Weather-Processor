@@ -38,5 +38,3 @@ def calculate_color(value):
             return 'rgb(73,77,74)'
     except ValueError:
         return 'rgb(73,77,74)'
-    
-

@@ -37,7 +37,6 @@ def serve_layout():
         html.Div([html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
                   html.Div(id='peepo', children = [html.Img( src=f'{icon_path}{rand_image}', srcSet=f'{icon_path}{rand_image}', style={"max-width": '100%'})],style={"display": "flex", "align-items":"center" , "max-width": '6%'}),
     ], style={"display": "flex", "justify-content":"center"}),
-    html.Div(id='col_len', style={'display': 'none'}),
     dcc.Store(id='store', storage_type='memory', data={'peepo':'','column_length':16})
 ])
 
