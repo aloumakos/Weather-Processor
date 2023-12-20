@@ -70,13 +70,17 @@ def update_table(n, tab_value, data):
     cycle_hour = tab_value.split('-')[1] if tab_value else '00'
     report_ls = os.listdir("./reports")
 
-    if (tabs:= r.hgetall("tabs")) is None:
-        tabs, filename = get_tabs_from_files(report_ls)
-    if (fn:= r.get(cycle_hour)) is None:
-        if filename is None: return None, None, None, tabs['00'], tabs['06'], tabs['12'], tabs['18']
-        else: report_df = pd.read_csv(f"./reports/{filename}")
-    else: report_df = pd.read_csv(StringIO(fn))
-    
+    try:
+        if (tabs:= r.hgetall("tabs")) is None:
+            tabs, filename = get_tabs_from_files(report_ls)
+        if (fn:= r.get(cycle_hour)) is None:
+            if filename is None: return None, None, None, tabs['00'], tabs['06'], tabs['12'], tabs['18']
+            else: report_df = pd.read_csv(f"./reports/{filename}")
+        else: report_df = pd.read_csv(StringIO(fn))
+    except:
+         tabs, filename = get_tabs_from_files(report_ls)
+         report_df = pd.read_csv(f"./reports/{filename}")
+         
     report_df = report_df.fillna("")
     report_df = report_df.map(lambda x: x.lower() if isinstance(x, str) else x)
     report_df.columns = map(str.lower, report_df.columns)
