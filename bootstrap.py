@@ -3,9 +3,12 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 import io
+import redis
+import os
+import random
 
-# If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/drive"]
+tabs = {}
 
 def upload_report(fn):
   
@@ -54,8 +57,12 @@ def download_reports():
             done = False
             while done is False:
                 status, done = downloader.next_chunk()
+            parts = item['name'].split("_")
+            tabs[item['name'][-2:]] = f'{parts[1]} [{parts[2]}]'
             with open(f"reports/{item['name']}", "wb") as f:
                 f.write(file.getbuffer())
+            file.seek(0)
+            r.set(item['name'][-2:], file.getbuffer())
             
     except HttpError as error:
         # TODO(developer) - Handle errors from drive API.
@@ -86,6 +93,9 @@ def delete_report(fn):
         print(f"An error occurred: {error}")
 
 if __name__ == '__main__':
+    r = redis.Redis(host='localhost', port=6379, decode_responses=True)
     download_reports()
+    r.hset("tabs", mapping=tabs)
+    r.set('peepo', random.choice(os.listdir('./assets/icons/')))
 
   

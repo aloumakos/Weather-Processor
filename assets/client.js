@@ -1,8 +1,8 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
-        update_progress_bar: function(n, col_len ) {
+        update_progress_bar: function(n, data ) {
             const style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}
-            if (col_len !== null && col_len < 16) {
+            if (data['column_length'] !== null && data['column_length'] < 16) {
                 return [(n*0.1)%30 , style];
             } else {
                 return [0 , {"display": "none"}];

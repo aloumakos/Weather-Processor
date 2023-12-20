@@ -1,0 +1,28 @@
+@media screen and (max-width:600px){
+    .table-size{
+        overflow-x:auto;
+    }
+}
+
+.custom-tab {
+    border: 1px solid #0a0a0a !important;
+    color: black !important;
+    background-color: #779ECB !important;
+    border-radius: 20px !important;
+    padding: 30px 25px !important;
+    margin: 5px !important;
+    width: 330px !important;
+    height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center;
+}
+
+.selected-tab {
+    border: 5px solid #779ECB !important;
+    color: white !important;
+    background-color: #386394 !important;
+    border-radius: 20px !important;
+    font-weight: bold !important;
+    justify-content: center;
+}

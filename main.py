@@ -13,6 +13,10 @@ import numpy as np
 import re
 from bootstrap import upload_report, delete_report
 import json
+import redis
+import random
+
+r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 parser = argparse.ArgumentParser(
                     prog='Get Weather Data',
@@ -57,7 +61,12 @@ else:
         file_dt = "".join(list(map(str,[dt.year,f"{dt.month:02d}",f"{dt.day:02d}"])))
     cycle = f'{int(args.c):02d}'
     base = f'gefs.{file_dt}/{cycle}/atmos/pgrb2ap5/geavg.t{cycle}z.pgrb2a.0p50.f'
-    
+
+tabs = r.hgetall("tabs")
+tabs[cycle] = f'{ dt.strftime("%d-%m-%Y")} [{cycle}]'
+r.hset('tabs', mapping=tabs)
+r.set('peepo', random.choice(os.listdir('./assets/icons/')))
+
 try:
     report_ls = os.listdir("./reports")
     r = re.compile(f"_{((int(cycle)-6)%24):02d}$")
@@ -142,7 +151,8 @@ while files:
             report_df.loc['Total']= report_df[report_df.columns[1:]][:-1].sum(min_count=1)
             report_df = report_df.round(2)
             report_df.drop(columns=['Normal']).to_csv(f'reports/report_{ dt.strftime("%Y-%m-%d")}_{cycle}', index=False)
-            
+            r.set(cycle, report_df.drop(columns=['Normal']).to_csv(index=False))
+
             cycles = []
         client.download_file('noaa-gefs-pds', files[0], 'temp')
         cycles.append(f"dd_{idx%24:02d}")
