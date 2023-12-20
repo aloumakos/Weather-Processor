@@ -169,8 +169,8 @@ pbar.close()
 
 try:  
     os.remove('temp')
-    delete_report(f'report_{ (dt+relativedelta(days=-1)).strftime("%Y-%m-%d")}_{cycle}')
-    upload_report(f'reports/report_{ dt.strftime("%Y-%m-%d")}_{cycle}')
+    delete_report(f'report_{ (dt+relativedelta(days=-1)).strftime("%d-%m-%Y")}_{cycle}')
+    upload_report(f'reports/report_{ dt.strftime("%d-%m-%Y")}_{cycle}')
 except:
     pass
     
