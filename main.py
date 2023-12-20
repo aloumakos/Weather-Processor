@@ -69,8 +69,8 @@ r.set('peepo', random.choice(os.listdir('./assets/icons/')))
 
 try:
     report_ls = os.listdir("./reports")
-    r = re.compile(f"_{((int(cycle)-6)%24):02d}$")
-    fn = list(filter(r.search, report_ls))[0]
+    rgx = re.compile(f"_{((int(cycle)-6)%24):02d}$")
+    fn = list(filter(rgx.search, report_ls))[0]
 
     last_report = pd.read_csv(f"./reports/{fn}")
     last_report = last_report.iloc[:-1].to_dict()
@@ -124,8 +124,8 @@ def _to_region(x):
 
 try:
     report_ls = os.listdir("./reports")
-    r = re.compile(f"_{int(cycle):02d}$")
-    fn = list(filter(r.search, report_ls))[0]
+    rgx = re.compile(f"_{int(cycle):02d}$")
+    fn = list(filter(rgx.search, report_ls))[0]
     os.remove(f"./reports/{fn}")
 except:
     pass
@@ -152,7 +152,7 @@ while files:
             report_df = report_df.round(2)
             report_df.drop(columns=['Normal']).to_csv(f'reports/report_{ dt.strftime("%Y-%m-%d")}_{cycle}', index=False)
             r.set(cycle, report_df.drop(columns=['Normal']).to_csv(index=False))
-
+            
             cycles = []
         client.download_file('noaa-gefs-pds', files[0], 'temp')
         cycles.append(f"dd_{idx%24:02d}")
