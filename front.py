@@ -21,24 +21,24 @@ app.config.external_stylesheets, app._favicon, server = [dbc.themes.DARKLY], ("p
 icon_path = './assets/icons/'
 
 def serve_layout():
-    rand_image = r.get('peepo')
+    try: rand_image = r.get('peepo')
+    except: rand_image = 'pepe-el.gif'
     return html.Div(
-    style={'textAlign': 'center', 'font-family': "Lucida Console, monospace", },
+    style={'textAlign': 'center', 'fontFamily': "Lucida Console, monospace", },
     children=[ dbc.Alert(id="countdown", color="primary"), dcc.Interval( id="interval-component-countdown", interval=100, n_intervals=0,),
-        dcc.Tabs(id='tabs', value='tab-00',style={'display':'flex', 'align-items': 'center', 'justify-content': 'center'},children=[
+        dcc.Tabs(id='tabs', value='tab-00',style={'display':'flex', 'alignItems': 'center', 'justifyContent': 'center'},children=[
             dcc.Tab(id='tab1',label='', value='tab-00',className="custom-tab", selected_className="selected-tab"),
             dcc.Tab(id='tab2',label='', value='tab-06',className="custom-tab", selected_className="selected-tab"),
             dcc.Tab(id='tab3',label='', value='tab-12',className="custom-tab", selected_className="selected-tab"),
             dcc.Tab(id='tab4',label='', value='tab-18',className="custom-tab", selected_className="selected-tab"),]),
-        html.Div(id="table-output", style={'textAlign': 'center', 'padding-top': '40px','padding-bottom': '40px','margin': 'auto',},className="table-size"),
+        html.Div(id="table-output", style={'textAlign': 'center', 'paddingTop': '40px','paddingBottom': '40px','display':'flex', 'justifyContent': 'center',},className="table-size"),
         dcc.Interval(id="interval-component", interval=1 * 30 * 1000, n_intervals=0,),
         dcc.Interval(id="peepo-interval-component", interval=5 * 60 * 1000, n_intervals=0),
-        html.Div(id='progress-div', children=[dbc.Progress(id='progress-bar', min=0, max=30, value=0, style={'margin-bottom':'10px','width': '180px'})],style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
+        html.Div(id='progress-div', children=[dbc.Progress(id='progress-bar', min=0, max=30, value=0, style={'marginBottom':'10px','width': '180px'})],style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center'}),
         html.Div([html.Img(src="assets/hello_kitty.gif", style={'width': '6%', 'height': 'auto'}),
-                  html.Div(id='peepo', children = [html.Img( src=f'{icon_path}{rand_image}', srcSet=f'{icon_path}{rand_image}', style={"max-width": '100%'})],style={"display": "flex", "align-items":"center" , "max-width": '6%'}),
-    ], style={"display": "flex", "justify-content":"center"}),
-    html.Div(id='col_len', style={'display': 'none'}),
-    dcc.Store(id='store', storage_type='memory', data={'peepo':'','column_length':16})
+                  html.Div(id='peepo', children = [html.Img( src=f'{icon_path}{rand_image}', srcSet=f'{icon_path}{rand_image}', style={"maxHeight": '100%','maxWidth':'100%'})],style={"display": "flex", "alignItems":"center" , "maxWidth": '6%'}),
+    ], style={"display": "flex", "justifyContent":"center"}),
+    dcc.Store(id='store', storage_type='session')
 ])
 
 app.layout = serve_layout
@@ -56,10 +56,13 @@ clientside_callback(ClientsideFunction(namespace='clientside', function_name='up
     [Input("peepo-interval-component", "n_intervals"), State('store', 'data'),], prevent_initial_call=True)
 def peepo(n, data):
     
-    if (rand_image:= r.get('peepo')) == data['peepo']: raise PreventUpdate
+    if data is None: data = {'column_length':16, 'peepo':''}
+    try: rand_image= r.get('peepo')
+    except: rand_image = 'pepe-el.gif'
+    if (rand_image) == data['peepo']: raise PreventUpdate
     else:
         data['peepo'] = rand_image
-        return html.Img( src=f'{icon_path}{rand_image}', srcSet=f'{icon_path}{rand_image}' ,style={"max-height": '100%'},), data
+        return html.Img( src=f'{icon_path}{rand_image}', srcSet=f'{icon_path}{rand_image}' ,style={"maxHeight": '100%'},), data
 
 @app.callback([Output("table-output", "children"), Output("store", "data"), Output('tab1','label'),
               Output('tab2','label'),Output('tab3','label'),Output('tab4','label'),],
@@ -68,19 +71,23 @@ def update_table(n, tab_value, data):
 
     cycle_hour = tab_value.split('-')[1] if tab_value else '00'
     report_ls = os.listdir("./reports")
-
-    if (tabs:= r.hgetall("tabs")) is None:
-        tabs, filename = get_tabs_from_files(report_ls)
-    if (fn:= r.get(cycle_hour)) is None:
-        if filename is None: return None, None, None, tabs['00'], tabs['06'], tabs['12'], tabs['18']
-        else: report_df = pd.read_csv(f"./reports/{filename}")
-    else: report_df = pd.read_csv(StringIO(fn))
+    try:
+        if (tabs:= r.hgetall("tabs")) is None: tabs, filename = get_tabs_from_files(report_ls)
+        if (fn:= r.get(cycle_hour)) is None:
+            if filename is None: return None, None, None, tabs['00'], tabs['06'], tabs['12'], tabs['18']
+            else: report_df = pd.read_csv(f"./reports/{filename}")
+        else: report_df = pd.read_csv(StringIO(fn))
+    except:
+         tabs, filename = get_tabs_from_files(report_ls, cycle_hour)
+         report_df = pd.read_csv(f"./reports/{filename}")
     
     report_df = report_df.fillna("")
     report_df = report_df.map(lambda x: x.lower() if isinstance(x, str) else x)
     report_df.columns = map(str.lower, report_df.columns)
 
-    data['column_length'] = (report_df['current fc']!='').sum()    
+    if data is not None: data['column_length'] = (report_df['current fc']!='').sum()
+    else: data = {'peepo': '', 'column_length' :(report_df['current fc']!='').sum()}
+
     col_names = ['diff from normal','diff 12 hours ago','diff 24 hours ago']
     style_conditions = [{'if': {'column_id': col, 'row_index': i},'backgroundColor': calculate_color(value) if col in col_names else 'rgb(73,77,74)',
                         'color': 'black' if col in col_names else 'white'} for col in report_df.columns[1:] for i, value in enumerate(report_df[col])]
@@ -93,11 +100,12 @@ def update_table(n, tab_value, data):
                                  data=report_df.to_dict("records"),
                                  columns=[{"name": i, "id": i} for i in report_df.columns],
                                  style_table={'border': '10px solid #313532','border-radius':'5px'},
-                                 style_cell={'textAlign': 'center', 'font-family': 'Lucida Console,monospace','minWidth': '170px','border': '2px solid #3e423f'},
+                                 style_cell={'textAlign': 'center', 'fontFamily': 'Lucida Console,monospace','minWidth': '170px','border': '2px solid #3e423f','whitespace':'normal'},
+                                 fill_width=False,
                                  style_header={'backgroundColor': 'rgb(30, 30, 30)', 'fontWeight': 'bold', 'color': 'white'},
                                  style_data={'backgroundColor': 'rgb(50, 50, 50)', 'color': 'white'},
                                  style_data_conditional=style_data_conditional)
     return html.Div([table]), data, tabs['00'], tabs['06'], tabs['12'], tabs['18']
 
 if __name__ == "__main__":
-    app.run_server(port=8050,)
+    app.run_server(port=8050)

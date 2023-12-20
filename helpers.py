@@ -21,7 +21,7 @@ def get_tabs_from_files(report_ls, cycle):
         elif filename.endswith('06'): tabs['06'] = filename
         elif filename.endswith('12'): tabs['12']= filename
         elif filename.endswith('18'): tabs['18'] = filename
-        if filename.endswith(cycle): fn = filename
+        if filename.endswith(cycle): fn = file
 
     return tabs, fn
 
@@ -29,14 +29,12 @@ def calculate_color(value):
     try:
         numeric_value = float(value)
         if -100 < numeric_value <= 0:
-            red_value = int(255 - abs(numeric_value) * 85)
+            red_value = max(int(255 - abs(numeric_value) * 75),95-abs(numeric_value))
             return f'rgb(255, {red_value}, {red_value})'
         elif 0 <= numeric_value < 100:
-            blue_value = int(255 - abs(numeric_value) * 85)
+            blue_value = max(int(255 - abs(numeric_value) * 75),95-abs(numeric_value))
             return f'rgb({blue_value}, {blue_value}, 255)'
         else:
             return 'rgb(73,77,74)'
     except ValueError:
         return 'rgb(73,77,74)'
-    
-
