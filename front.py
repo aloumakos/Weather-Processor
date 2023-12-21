@@ -99,13 +99,12 @@ def update_table(n, tab_value, data):
     table = dash_table.DataTable(id="table",
                                  data=report_df.to_dict("records"),
                                  columns=[{"name": i, "id": i} for i in report_df.columns],
-                                 style_table={'border': '10px solid #313532','border-radius':'5px'},
                                  style_cell={'textAlign': 'center', 'fontFamily': 'Lucida Console,monospace','minWidth': '170px','border': '2px solid #3e423f','whitespace':'normal'},
                                  fill_width=False,
                                  style_header={'backgroundColor': 'rgb(30, 30, 30)', 'fontWeight': 'bold', 'color': 'white'},
                                  style_data={'backgroundColor': 'rgb(50, 50, 50)', 'color': 'white'},
                                  style_data_conditional=style_data_conditional)
-    return html.Div([table]), data, tabs['00'], tabs['06'], tabs['12'], tabs['18']
+    return html.Div(html.Div([table]),style={'width':'80.78%','overflowX':'auto','border': '10px solid #313532','border-radius':'5px'}), data, tabs['00'], tabs['06'], tabs['12'], tabs['18']
 
 if __name__ == "__main__":
     app.run_server(port=8050)
