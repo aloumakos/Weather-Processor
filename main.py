@@ -150,7 +150,7 @@ while files:
             report_df['Diff 24 hours ago'] = report_df['Current FC']-report_df['FC 24 hours ago']
             report_df.loc['Total']= report_df[report_df.columns[1:]][:-1].sum(min_count=1)
             report_df = report_df.round(2)
-            report_df.drop(columns=['Normal']).to_csv(f'reports/report_{ dt.strftime("%Y-%m-%d")}_{cycle}', index=False)
+            report_df.drop(columns=['Normal']).to_csv(f'reports/report_{ dt.strftime("%d-%m-%Y")}_{cycle}', index=False)
             r.set(cycle, report_df.drop(columns=['Normal']).to_csv(index=False))
             
             cycles = []
@@ -171,8 +171,6 @@ try:
     os.remove('temp')
     delete_report(f'report_{ (dt+relativedelta(days=-1)).strftime("%d-%m-%Y")}_{cycle}')
     upload_report(f'reports/report_{ dt.strftime("%d-%m-%Y")}_{cycle}')
-except:
+except Exception as e:
+    print(e)
     pass
-    
-
-    
