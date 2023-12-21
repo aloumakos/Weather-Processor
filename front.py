@@ -104,7 +104,7 @@ def update_table(n, tab_value, data):
                                  style_header={'backgroundColor': 'rgb(30, 30, 30)', 'fontWeight': 'bold', 'color': 'white'},
                                  style_data={'backgroundColor': 'rgb(50, 50, 50)', 'color': 'white'},
                                  style_data_conditional=style_data_conditional)
-    return html.Div(html.Div([table]),style={'width':'80.78%','overflowX':'auto','border': '10px solid #313532','border-radius':'5px'}), data, tabs['00'], tabs['06'], tabs['12'], tabs['18']
+    return html.Div(html.Div([table]),style={'overflowX':'auto','border': '10px solid #313532','border-radius':'5px'}), data, tabs['00'], tabs['06'], tabs['12'], tabs['18']
 
 if __name__ == "__main__":
     app.run_server(port=8050)
