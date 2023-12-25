@@ -62,7 +62,7 @@ def peepo(n, data):
     if (rand_image) == data['peepo']: raise PreventUpdate
     else:
         data['peepo'] = rand_image
-        return html.Img( src=f'{icon_path}{rand_image}', srcSet=f'{icon_path}{rand_image}' ,style={"maxHeight": '100%'},), data
+        return html.Img( src=f'{icon_path}{rand_image}', srcSet=f'{icon_path}{rand_image}' ,style={"maxHeight": '100%','maxWidth':'100%'},), data
 
 @app.callback([Output("table-output", "children"), Output("store", "data"), Output('tab1','label'),
               Output('tab2','label'),Output('tab3','label'),Output('tab4','label'),],
