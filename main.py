@@ -26,7 +26,7 @@ parser.add_argument('-d',)
 parser.add_argument('-c',)  
 args = parser.parse_args()
 
-with open('normal_tdd.json', 'r') as openfile:
+with open('normal_recent_tdd.json', 'r') as openfile:
     normal_dict = json.load(openfile)
 ct_df = pd.read_csv("usregions.csv")[:30000]
 lls = list(zip(ct_df['lat'], ct_df['lng']))
