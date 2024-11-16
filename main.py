@@ -11,7 +11,7 @@ import argparse
 from tqdm import tqdm
 import numpy as np
 import re
-from bootstrap import upload_report, delete_report
+from bootstrap import upload_report, delete_report, list_reports
 import json
 import redis
 import random
@@ -75,7 +75,7 @@ try:
     last_report = pd.read_csv(f"./reports/{fn}")
     last_report = last_report.iloc[:-1].to_dict()
 except:
-    last_report = report_dict = {
+    last_report = {
         "Current FC": [],
         "FC 6 hours ago": [],
         "FC 12 hours ago": [],
@@ -108,7 +108,7 @@ for i in range(246,390-int(cycle),6):
 
 def process(file, cycle):
     grbs = pygrib.open(file)
-    grb = grbs.select(name='Temperature')[-2]
+    grb = grbs.select(name='Temperature')[-1]
     data = grb.data()[0]
     
     def f(lat, lon):
@@ -127,9 +127,10 @@ try:
     rgx = re.compile(f"_{int(cycle):02d}$")
     fn = list(filter(rgx.search, report_ls))[0]
     os.remove(f"./reports/{fn}")
-except:
-    pass
+except Exception as e:
+    print(f"Failed to remove file with exception {e}")
 
+print(f"Listing reports locally: {list(os.listdir("./reports"))}")
 cycles = []
 error_flag = False
 pbar = tqdm(total=len(files))
@@ -169,8 +170,10 @@ pbar.close()
 
 try:  
     os.remove('temp')
-    delete_report(f'report_{ (dt+relativedelta(days=-1)).strftime("%d-%m-%Y")}_{cycle}')
+    reports = list_reports()
+    for report in reports[3:]:
+        delete_report(report)
     upload_report(f'reports/report_{ dt.strftime("%d-%m-%Y")}_{cycle}')
 except Exception as e:
-    print(e)
-    pass
+    print(f"Failed to upload or remove file on drive with exception {e}")
+    

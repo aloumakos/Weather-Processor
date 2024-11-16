@@ -78,8 +78,8 @@ def update_table(n, tab_value, data):
             else: report_df = pd.read_csv(f"./reports/{filename}")
         else: report_df = pd.read_csv(StringIO(fn))
     except:
-         tabs, filename = get_tabs_from_files(report_ls, cycle_hour)
-         report_df = pd.read_csv(f"./reports/{filename}")
+        tabs, filename = get_tabs_from_files(report_ls, cycle_hour)
+        report_df = pd.read_csv(f"./reports/{filename}")
     
     report_df = report_df.fillna("")
     report_df = report_df.map(lambda x: x.lower() if isinstance(x, str) else x)

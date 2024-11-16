@@ -92,10 +92,37 @@ def delete_report(fn):
         # TODO(developer) - Handle errors from drive API.
         print(f"An error occurred: {error}")
 
+
+def list_reports():
+
+    creds = ServiceAccountCredentials.from_json_keyfile_name(
+        'keys.json', SCOPES)
+    try:
+
+        service = build("drive", "v3", credentials=creds)
+
+        # Call the Drive v3 API
+        results = (
+            service.files()
+            .list(q=f"'16yG-r0NOTsKZHL5JXhqoXTzFuyDG68Aq' in parents", pageSize=10, fields="nextPageToken, files(id, name)")
+            .execute()
+        )
+        items = results.get("files", [])
+        
+        items = sorted([item["name"] for item in items], reverse=True)
+        return items
+    except HttpError as error:
+        # TODO(developer) - Handle errors from drive API.
+        print(f"An error occurred: {error}")
+
 if __name__ == '__main__':
     r = redis.Redis(host='localhost', port=6379, decode_responses=True)
     download_reports()
     r.hset("tabs", mapping=tabs)
     r.set('peepo', random.choice(os.listdir('./assets/icons/')))
+
+    
+
+
 
   
