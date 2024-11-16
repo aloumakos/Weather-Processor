@@ -11,6 +11,7 @@ def get_tabs_from_files(report_ls, cycle):
     tabs = {}
     tabs[0] = tabs[1] = tabs[2] = tabs[3] = "TBA"
     filtered_list = [item for item in report_ls if item.startswith('report_2023')]
+    fn = None
     for file in filtered_list:
         tab_l = extract_date(file)
         date = datetime.strptime(tab_l[0],'%Y-%m-%d')
