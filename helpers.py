@@ -9,7 +9,7 @@ def extract_date(filename):
 def get_tabs_from_files(report_ls, cycle):
 
     tabs = {}
-    tabs[0] = tabs[1] = tabs[2] = tabs[3] = "TBA"
+    tabs['00'] = tabs['06'] = tabs['12'] = tabs['18'] = "TBA"
     filtered_list = [item for item in report_ls if item.startswith('report_2023')]
     fn = None
     for file in filtered_list:
