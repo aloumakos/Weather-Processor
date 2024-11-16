@@ -71,17 +71,11 @@ def update_table(n, tab_value, data):
 
     cycle_hour = tab_value.split('-')[1] if tab_value else '00'
     report_ls = os.listdir("./reports")
-    try:
-        if (tabs:= r.hgetall("tabs")) is None: tabs, filename = get_tabs_from_files(report_ls)
-        if filename is None: return None, None, tabs['00'], tabs['06'], tabs['12'], tabs['18']
-        if (fn:= r.get(cycle_hour)) is None:
-            if filename is None: return None, None, tabs['00'], tabs['06'], tabs['12'], tabs['18']
-            else: report_df = pd.read_csv(f"./reports/{filename}")
-        else: report_df = pd.read_csv(StringIO(fn))
-    except:
-        tabs, filename = get_tabs_from_files(report_ls, cycle_hour)
-        if filename is None: return None, None, tabs['00'], tabs['06'], tabs['12'], tabs['18']
-        report_df = pd.read_csv(f"./reports/{filename}")
+    
+    if (tabs:= r.hgetall("tabs")) is None: return None, {}, tabs['00'], tabs['06'], tabs['12'], tabs['18']
+    if (fn:= r.get(cycle_hour)) is None: return None, {}, tabs['00'], tabs['06'], tabs['12'], tabs['18']
+
+    report_df = pd.read_csv(StringIO(fn))
     
     report_df = report_df.fillna("")
     report_df = report_df.map(lambda x: x.lower() if isinstance(x, str) else x)

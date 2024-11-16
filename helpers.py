@@ -10,9 +10,8 @@ def get_tabs_from_files(report_ls, cycle):
 
     tabs = {}
     tabs['00'] = tabs['06'] = tabs['12'] = tabs['18'] = "TBA"
-    filtered_list = [item for item in report_ls if item.startswith('report_2023')]
     fn = None
-    for file in filtered_list:
+    for file in report_ls:
         tab_l = extract_date(file)
         date = datetime.strptime(tab_l[0],'%Y-%m-%d')
         date = date.strftime('%d-%m-%Y')
