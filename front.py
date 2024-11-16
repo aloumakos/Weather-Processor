@@ -73,12 +73,14 @@ def update_table(n, tab_value, data):
     report_ls = os.listdir("./reports")
     try:
         if (tabs:= r.hgetall("tabs")) is None: tabs, filename = get_tabs_from_files(report_ls)
+        if filename is None: return None, None, None, tabs['00'], tabs['06'], tabs['12'], tabs['18']
         if (fn:= r.get(cycle_hour)) is None:
             if filename is None: return None, None, None, tabs['00'], tabs['06'], tabs['12'], tabs['18']
             else: report_df = pd.read_csv(f"./reports/{filename}")
         else: report_df = pd.read_csv(StringIO(fn))
     except:
         tabs, filename = get_tabs_from_files(report_ls, cycle_hour)
+        if filename is None: return None, None, None, tabs['00'], tabs['06'], tabs['12'], tabs['18']
         report_df = pd.read_csv(f"./reports/{filename}")
     
     report_df = report_df.fillna("")
