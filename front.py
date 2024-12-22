@@ -56,7 +56,7 @@ clientside_callback(ClientsideFunction(namespace='clientside', function_name='up
     [Input("peepo-interval-component", "n_intervals"), State('store', 'data'),], prevent_initial_call=True)
 def peepo(n, data):
     
-    if data is None: data = {'column_length':16, 'peepo':''}
+    if not data: data = {'column_length':16, 'peepo':''}
     try: rand_image= r.get('peepo')
     except: rand_image = 'pepe-el.gif'
     if (rand_image) == data['peepo']: raise PreventUpdate
