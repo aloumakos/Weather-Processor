@@ -55,6 +55,7 @@ def download_reports():
         done = False
         while done is False:
             status, done = downloader.next_chunk()
+        os.makedirs(os.path.dirname(f"reports/{item['name']}"), exist_ok=True)
         with open(f"reports/{item['name']}", "wb") as f:
             f.write(file.getbuffer())
         if not item["name"].endswith(".log"):
