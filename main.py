@@ -38,7 +38,6 @@ else:
     day = int(args.d.split('/')[1])
     dt = datetime(datetime.now().year, month, day)
 
-
 client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
 
 if args.c is None:
@@ -124,9 +123,11 @@ def _to_region(x):
 
 try:
     report_ls = os.listdir("./reports")
-    rgx = re.compile(f"_{int(cycle):02d}$")
-    fn = list(filter(rgx.search, report_ls))[0]
-    os.remove(f"./reports/{fn}")
+    # rgx = re.compile(f"_{int(cycle):02d}$")
+    # fn = list(filter(rgx.search, report_ls))[0]
+    for fn in report_ls:
+        if fn.endswith(f"_{int(cycle):02d}") or fn.endswith("log"):
+            os.remove(f"./reports/{fn}")
 except Exception as e:
     print(f"Failed to remove file with exception {e}")
 
@@ -171,9 +172,13 @@ pbar.close()
 try:  
     os.remove('temp')
     reports = list_reports()
-    for report in reports[3:]:
-        delete_report(report)
+    for fn in reports:
+        if fn.endswith(f"_{int(cycle):02d}"):
+            delete_report(fn)
     upload_report(f'reports/report_{ dt.strftime("%d-%m-%Y")}_{cycle}')
 except Exception as e:
-    print(f"Failed to upload or remove file on drive with exception {e}")
+    with open("reports/errors.log", "a") as f:
+        f.write(f"{str(datetime.now())}: {str(e)}")
+    delete_report("error.log")
+    upload_report("reports/error.log")
     
