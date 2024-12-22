@@ -111,8 +111,8 @@ def list_reports():
 if __name__ == '__main__':
     r = redis.Redis(host='localhost', port=6379, decode_responses=True)
     download_reports()
-    if not tabs:
-        tabs = {cycle: 'TBA' for cycle in ['00','06','12','18']}
+    for cycle in ['00','06','12','18']:
+        tabs[cycle] = tabs.get('cycle') or 'TBA'
     r.hset("tabs", mapping=tabs)
     r.set('peepo', random.choice(os.listdir('./assets/icons/')))
 
