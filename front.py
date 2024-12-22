@@ -70,7 +70,7 @@ def peepo(n, data):
 def update_table(n, tab_value, data):
 
     cycle_hour = tab_value.split('-')[1] if tab_value else '00'
-    report_ls = os.listdir("./reports")
+    # report_ls = os.listdir("./reports")
     
     if (tabs:= r.hgetall("tabs")) is None or (fn:=r.get(cycle_hour)) is None: return None, {}, 'TBA', 'TBA', 'TBA', 'TBA'
 

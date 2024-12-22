@@ -18,7 +18,7 @@ def upload_report(fn):
         
         service = build("drive", "v3", credentials=creds)
 
-        file_metadata = {"name": fn.split("/")[-1], "parents": ["16yG-r0NOTsKZHL5JXhqoXTzFuyDG68Aq"]}
+        file_metadata = {"name": fn, "parents": ["16yG-r0NOTsKZHL5JXhqoXTzFuyDG68Aq"]}
         media = MediaFileUpload(
             fn, mimetype="text/csv", resumable=True
         )
@@ -31,42 +31,37 @@ def upload_report(fn):
         # print(f'File ID: {file.get("id")}')
 
     except HttpError as error:
-        print(f"An error occurred: {error}")
-        file = None
+        raise Exception(f"An error occurred while uploading {fn}: {error}")
 
 def download_reports():
   
     creds = ServiceAccountCredentials.from_json_keyfile_name(
         'keys.json', SCOPES)
-    try:
 
-        service = build("drive", "v3", credentials=creds)
+    service = build("drive", "v3", credentials=creds)
 
-        # Call the Drive v3 API
-        results = (
-            service.files()
-            .list(q="'16yG-r0NOTsKZHL5JXhqoXTzFuyDG68Aq' in parents", pageSize=10, fields="nextPageToken, files(id, name)")
-            .execute()
-        )
-        items = results.get("files", [])
-        
-        for item in items:
-            request = service.files().get_media(fileId=item['id'])
-            file = io.BytesIO()
-            downloader = MediaIoBaseDownload(file, request)
-            done = False
-            while done is False:
-                status, done = downloader.next_chunk()
-            parts = item['name'].split("_")
-            tabs[item['name'][-2:]] = f'{parts[1]} [{parts[2]}]'
-            with open(f"reports/{item['name']}", "wb") as f:
-                f.write(file.getbuffer())
-            file.seek(0)
-            r.set(item['name'][-2:], file.getbuffer())
-            
-    except HttpError as error:
-        # TODO(developer) - Handle errors from drive API.
-        print(f"An error occurred: {error}")
+    # Call the Drive v3 API
+    results = (
+        service.files()
+        .list(q="'16yG-r0NOTsKZHL5JXhqoXTzFuyDG68Aq' in parents", pageSize=10, fields="nextPageToken, files(id, name)")
+        .execute()
+    )
+    items = results.get("files", [])
+    
+    for item in items:
+        request = service.files().get_media(fileId=item['id'])
+        file = io.BytesIO()
+        downloader = MediaIoBaseDownload(file, request)
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
+        if item["name"].endswith(".log"):
+            continue
+        parts = item['name'].split("_")
+        tabs[item['name'][-2:]] = f'{parts[1]} [{parts[2]}]'
+        with open(f"reports/{item['name']}", "wb") as f:
+            f.write(file.getbuffer())
+        r.set(item['name'][-2:], file.getbuffer())
 
 
 def delete_report(fn):
@@ -89,8 +84,7 @@ def delete_report(fn):
             response = service.files().delete(fileId=item['id']).execute()
             
     except HttpError as error:
-        # TODO(developer) - Handle errors from drive API.
-        print(f"An error occurred: {error}")
+        raise Exception(f"An error occurred while deleting {fn}: {error}")
 
 
 def list_reports():
@@ -112,8 +106,7 @@ def list_reports():
         items = sorted([item["name"] for item in items], reverse=True)
         return items
     except HttpError as error:
-        # TODO(developer) - Handle errors from drive API.
-        print(f"An error occurred: {error}")
+        raise Exception(f"An error occurred while listing reports: {error}")
 
 if __name__ == '__main__':
     r = redis.Redis(host='localhost', port=6379, decode_responses=True)
