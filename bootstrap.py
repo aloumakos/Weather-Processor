@@ -10,7 +10,7 @@ import random
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 tabs = {}
 
-def upload_report(fn):
+def upload_report(file, fn):
   
     creds = ServiceAccountCredentials.from_json_keyfile_name(
         'keys.json', SCOPES)
@@ -20,7 +20,7 @@ def upload_report(fn):
 
         file_metadata = {"name": fn, "parents": ["16yG-r0NOTsKZHL5JXhqoXTzFuyDG68Aq"]}
         media = MediaFileUpload(
-            fn, mimetype="text/csv", resumable=True
+            file, mimetype="text/csv", resumable=True
         )
         
         file = (
@@ -55,13 +55,12 @@ def download_reports():
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-        if item["name"].endswith(".log"):
-            continue
-        parts = item['name'].split("_")
-        tabs[item['name'][-2:]] = f'{parts[1]} [{parts[2]}]'
         with open(f"reports/{item['name']}", "wb") as f:
             f.write(file.getbuffer())
-        r.set(item['name'][-2:], file.getbuffer())
+        if not item["name"].endswith(".log"):
+            parts = item['name'].split("_")
+            tabs[item['name'][-2:]] = f'{parts[1]} [{parts[2]}]'
+            r.set(item['name'][-2:], file.getbuffer())
 
 
 def delete_report(fn):
@@ -111,6 +110,8 @@ def list_reports():
 if __name__ == '__main__':
     r = redis.Redis(host='localhost', port=6379, decode_responses=True)
     download_reports()
+    if not tabs:
+        tabs = {cycle: 'TBA' for cycle in ['00','06','12','18']}
     r.hset("tabs", mapping=tabs)
     r.set('peepo', random.choice(os.listdir('./assets/icons/')))
 
