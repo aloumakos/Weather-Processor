@@ -177,8 +177,5 @@ try:
             delete_report(fn)
     upload_report(f'reports/report_{ dt.strftime("%d-%m-%Y")}_{cycle}', f'report_{ dt.strftime("%d-%m-%Y")}_{cycle}')
 except Exception as e:
-    with open("reports/errors.log", "a") as f:
-        f.write(f"{str(datetime.now())}: {str(e)}")
-    delete_report("error.log")
-    upload_report("reports/error.log", "error.log")
+    print(e)
     
