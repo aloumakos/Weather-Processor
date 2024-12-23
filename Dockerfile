@@ -9,7 +9,6 @@ RUN apt-get -y install redis
 WORKDIR /home/weather
 COPY ./ ./
 RUN chmod +x ./cron_scripts/pull_data.sh ./cron_scripts/start.sh
-RUN crontab ./cron_scripts/crontab
 RUN pip install -r requirements.txt
 
 EXPOSE 8050
