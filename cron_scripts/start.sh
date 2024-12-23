@@ -1,5 +1,5 @@
 #!/bin/bash
-cron
+cron -f
 redis-server --daemonize yes
 sleep 5
 cd /home/weather
