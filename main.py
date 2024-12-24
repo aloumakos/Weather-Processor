@@ -18,6 +18,8 @@ import random
 
 r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
+print('Executing cron job')
+
 parser = argparse.ArgumentParser(
                     prog='Get Weather Data',
                     description='Downloads weather data from an S3 Bucket and processes them into a DataFrame',)
@@ -169,7 +171,7 @@ while files:
         time.sleep(60)
 pbar.close()
 
-try:  
+try:
     os.remove('temp')
     reports = list_reports()
     for fn in reports:
