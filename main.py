@@ -125,13 +125,11 @@ def _to_region(x):
 
 try:
     report_ls = os.listdir("./reports")
-    # rgx = re.compile(f"_{int(cycle):02d}$")
-    # fn = list(filter(rgx.search, report_ls))[0]
     for fn in report_ls:
-        if fn.endswith(f"_{int(cycle):02d}") or fn.endswith("log"):
+        if fn.endswith(f"_{int(cycle):02d}"):
             os.remove(f"./reports/{fn}")
 except Exception as e:
-    print(f"Failed to remove file with exception {e}")
+    os.mkdir("reports")
 
 cycles = []
 error_flag = False
