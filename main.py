@@ -133,7 +133,6 @@ try:
 except Exception as e:
     print(f"Failed to remove file with exception {e}")
 
-print(f"Listing reports locally: {list(os.listdir("./reports"))}")
 cycles = []
 error_flag = False
 pbar = tqdm(total=len(files))
