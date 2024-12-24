@@ -133,7 +133,7 @@ except Exception as e:
 
 cycles = []
 error_flag = False
-pbar = tqdm(total=len(files))
+pbar = tqdm(total=len(files), disable=True)
 while files:
     idx = int(files[0].split(".")[-1][-3:])
     try:    
@@ -153,14 +153,12 @@ while files:
             report_df = report_df.round(2)
             report_df.drop(columns=['Normal']).to_csv(f'reports/report_{ dt.strftime("%d-%m-%Y")}_{cycle}', index=False)
             r.set(cycle, report_df.drop(columns=['Normal']).to_csv(index=False))
-            
+            pbar.update()
             cycles = []
         client.download_file('noaa-gefs-pds', files[0], 'temp')
         cycles.append(f"dd_{idx%24:02d}")
         process('temp', f"{idx%24:02d}")
         time.sleep(2)
-        if pbar.n % 10 == 0:
-            print(str(pbar), flush=True)
         del files[0]
         error_flag = False
     except Exception as e:
