@@ -159,11 +159,11 @@ while files:
         cycles.append(f"dd_{idx%24:02d}")
         process('temp', f"{idx%24:02d}")
         time.sleep(2)
-        pbar.update()
+        if pbar.n % 10 == 0:
+            print(str(pbar), flush=True)
         del files[0]
         error_flag = False
     except Exception as e:
-        # print(e, flush=True)
         error_flag = True
         time.sleep(60)
 pbar.close()
