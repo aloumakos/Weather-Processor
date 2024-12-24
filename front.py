@@ -59,10 +59,10 @@ def peepo(n, data):
     if not data: data = {'column_length':16, 'peepo':''}
     try: rand_image= r.get('peepo')
     except: rand_image = 'pepe-el.gif'
-    if (rand_image) == data['peepo']: raise PreventUpdate
+    if (rand_image) == data.get('peepo'): raise PreventUpdate
     else:
         data['peepo'] = rand_image
-        return html.Img( src=f'{icon_path}{rand_image}', srcSet=f'{icon_path}{rand_image}' ,style={"maxHeight": '100%','maxWidth':'100%'},), data
+        return html.Img( src=f'{icon_path}{rand_image}', srcSet=f'{icon_path}{rand_image}', style={"maxHeight": '100%','maxWidth':'100%'},), data
 
 @app.callback([Output("table-output", "children"), Output("store", "data"), Output('tab1','label'),
               Output('tab2','label'),Output('tab3','label'),Output('tab4','label'),],
@@ -71,8 +71,8 @@ def update_table(n, tab_value, data):
 
     cycle_hour = tab_value.split('-')[1] if tab_value else '00'
     # report_ls = os.listdir("./reports")
-    
-    if (tabs:= r.hgetall("tabs")) is None or (fn:=r.get(cycle_hour)) is None: return None, {}, 'TBA', 'TBA', 'TBA', 'TBA'
+    tabs= r.hgetall("tabs")
+    if (fn:=r.get(cycle_hour)) is None: return None, {}, tabs['00'], tabs['06'], tabs['12'], tabs['18']
 
     report_df = pd.read_csv(StringIO(fn))
     
@@ -80,7 +80,7 @@ def update_table(n, tab_value, data):
     report_df = report_df.map(lambda x: x.lower() if isinstance(x, str) else x)
     report_df.columns = map(str.lower, report_df.columns)
 
-    if data is not None: data['column_length'] = (report_df['current fc']!='').sum()
+    if data: data['column_length'] = (report_df['current fc']!='').sum()
     else: data = {'peepo': '', 'column_length' :(report_df['current fc']!='').sum()}
 
     col_names = ['diff from normal','diff 12 hours ago','diff 24 hours ago']
