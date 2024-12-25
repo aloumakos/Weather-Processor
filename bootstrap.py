@@ -58,10 +58,9 @@ def download_reports():
         os.makedirs(os.path.dirname(f"reports/{item['name']}"), exist_ok=True)
         with open(f"reports/{item['name']}", "wb") as f:
             f.write(file.getbuffer())
-        if not item["name"].endswith(".log"):
-            parts = item['name'].split("_")
-            tabs[item['name'][-2:]] = f'{parts[1]} [{parts[2]}]'
-            r.set(item['name'][-2:], file.getbuffer())
+        parts = item['name'].split("_")
+        tabs[item['name'][-2:]] = f'{parts[1]} [{parts[2]}]'
+        r.set(item['name'][-2:], file.getbuffer())
 
 
 def delete_report(fn):

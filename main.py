@@ -85,7 +85,7 @@ except:
     }
 def _combine_reports(current_cycle, past_cycle, last_forecast):
     if current_cycle <= past_cycle:
-        return list(last_forecast.values())[1:] + [np.NaN]
+        return list(last_forecast.values())[1:] + [np.nan]
     return last_forecast
 
 report_dict = {
